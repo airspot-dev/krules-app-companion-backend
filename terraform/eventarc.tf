@@ -87,7 +87,7 @@ resource "google_project_service_identity" "eventarc-service-identity" {
 
 ##################### TRIGGERS ################################
 // Example: how to receive events from Pub/Sub (See pubsub.tf)
-/*
+
 resource "google_eventarc_trigger" "pubsub-ingestion-message-published" {
     for_each = var.targets
 
@@ -106,7 +106,7 @@ resource "google_eventarc_trigger" "pubsub-ingestion-message-published" {
     }
     destination {
             cloud_run_service {
-                    name   = "${each.value.cluster}"
+                    service   = "ingestion-receiver"
                     region  = "${each.value.region}"
             }
     }
@@ -115,5 +115,31 @@ resource "google_eventarc_trigger" "pubsub-ingestion-message-published" {
         google_project_service.eventarc-service
     ]
 }
-*/
 
+resource "google_eventarc_trigger" "pubsub-procevents-message-published" {
+    for_each = var.targets
+
+    project         = each.value.project_id
+    name            = "${var.project_name}-procevents-message-published-${each.key}"
+    location        = "${each.value.region}"
+    service_account = "${data.google_project.projects[each.value.project_id].number}-compute@developer.gserviceaccount.com"
+    matching_criteria {
+            attribute = "type"
+            value     = "google.cloud.pubsub.topic.v1.messagePublished"
+    }
+    transport {
+        pubsub {
+            topic     = "${var.project_name}-procevents-${each.key}"
+        }
+    }
+    destination {
+            cloud_run_service {
+                    service   = "procevents-logger-publisher"
+                    region  = "${each.value.region}"
+            }
+    }
+    depends_on = [
+        google_pubsub_topic.procevents,
+        google_project_service.eventarc-service
+    ]
+}

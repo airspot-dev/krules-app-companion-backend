@@ -34,6 +34,7 @@ TARGET_DICTS = sane_utils.get_target_dicts(TARGETS, (
     ("location", lambda target:
     sane_utils.get_var_for_target("zone", target, default=sane_utils.get_var_for_target("region", target))),
     ("require_approval", "false"),
+    "clouddeploy_region",
 ))
 
 sane_utils.google.make_enable_apis_recipe([
@@ -42,6 +43,7 @@ sane_utils.google.make_enable_apis_recipe([
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
     "clouddeploy.googleapis.com",
+    "run.googleapis.com",
 ])
 
 REGION = sane_utils.get_var_for_target('REGION', TARGETS[0], True)
@@ -74,7 +76,6 @@ def create_tf_vars(
         }
 ):
     import json
-    print(content())
     with open(os.path.join(ROOT_DIR, out_file), 'w') as of:
         json.dump(content(), of, indent=4)
 
@@ -133,7 +134,7 @@ sane_utils.make_render_resource_recipes(
 )
 
 sane_utils.google.make_gcloud_deploy_apply_recipe(
-    region=sane_utils.get_var_for_target('region', TARGETS[0], True),
+    region=sane_utils.get_var_for_target("CLOUDDEPLOY_REGION", TARGETS[0], False, default=REGION),
     templates=["targets.yaml.j2"],
     out_dir=".",
     hook_deps=[

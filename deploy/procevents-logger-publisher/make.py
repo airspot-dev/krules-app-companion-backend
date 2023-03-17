@@ -14,7 +14,6 @@ sane_utils.google.make_cloud_deploy_recipes(
     sources=[
         "ruleset.py",
         "routers.py",
-        "env.py"
     ],
 )
 

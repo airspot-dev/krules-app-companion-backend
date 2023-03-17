@@ -6,7 +6,7 @@ metadata:
 description: CloudRun {{ target.name }}
 requireApproval: {{ target.require_approval }}
 run:
-  location: projects/{{ target.project_id }}/locations/{{ target.location }}
+  location: projects/{{ target.project_id }}/locations/{{ target.region }}
 {% if not loop.last %}
 ---
 {% endif %}

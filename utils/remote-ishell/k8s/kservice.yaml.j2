@@ -1,0 +1,20 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ app_name }}
+  namespace: {{ namespace }}
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ app_name }}
+        image: {{ app_name }}
+        # ports:
+        # - containerPort: 8080
+        env:
+        - name: PROJECT_NAME
+          value: {{ project_name }}
+        - name: TARGET
+          value: {{ target }}
+        - name: PUBSUB_SINK
+          value: {{ project_name }}-default-sink

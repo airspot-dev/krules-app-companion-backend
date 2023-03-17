@@ -15,6 +15,12 @@ resource "google_service_account_iam_binding" "goog-id-iam-binding-default" {
     ]
 }
 
+resource "google_project_iam_member" "cloudrun-secret-manager-iam-binding" {
+    for_each = var.all_projects
+    project = "${each.key}"
+    role     = "roles/secretmanager.secretAccessor"
+    member   = "serviceAccount:${data.google_project.projects[each.key].number}-compute@developer.gserviceaccount.com"
+}
 
 // Some examples of IAM role binding
 /*
