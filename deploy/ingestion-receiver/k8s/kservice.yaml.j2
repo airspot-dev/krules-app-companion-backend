@@ -41,13 +41,13 @@ spec:
               key: '1'
               name: redis-auth
         - name: PUBSUB_SINK
-          value: {{ project_name }}-default-sink
+          value: {{ project_name }}-default-sink-{{ target }}
         - name: PUBSUB_PROCEVENTS_SINK
-          value: {{ project_name }}-procevents
+          value: {{ project_name }}-procevents-{{ target }}
         volumeMounts:
         - name: firebase-auth
           readOnly: true
-          mountPath: /firebase_credentials
+          mountPath: /var/secrets/firebase
       volumes:
       - name: firebase-auth
         secret:

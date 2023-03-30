@@ -11,13 +11,11 @@ sane_utils.load_env()
 sane_utils.google.make_cloud_deploy_recipes(
     image_base=sane_utils.check_env("RULESET_IMAGE_BASE"),
     baselibs=[
-        "firestore",
         "common"
     ],
     sources=[
         "ruleset.py",
-        "routers.py",
-        "env.py",
+        "routers.py"
     ],
 )
 

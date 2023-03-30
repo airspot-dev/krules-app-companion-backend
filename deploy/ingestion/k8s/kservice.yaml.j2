@@ -1,0 +1,37 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ app_name }}
+  namespace: {{ namespace }}
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    spec:
+      containers:
+      - name: {{ app_name }}
+        image: {{ app_name }}
+        env:
+        {% if target == "dev" %}
+        - name: PUBLISH_PROCEVENTS_LEVEL
+          value: "2"
+        - name: PUBLISH_PROCEVENTS_MATCHING
+          value: "*"
+        {% else %}
+        - name: PUBLISH_PROCEVENTS_LEVEL
+          value: "0"
+        {% endif %}
+        - name: PROJECT_NAME
+          value: {{ project_name }}
+        - name: PUBSUB_SINK
+          value: app-companion-ingestion-{{ target }}
+        - name: PUBSUB_PROCEVENTS_SINK
+          value: {{ project_name }}-procevents-{{ target }}
+        - name: TARGET
+          value: {{ target }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: '1'
+              name: ingestion-api-key
