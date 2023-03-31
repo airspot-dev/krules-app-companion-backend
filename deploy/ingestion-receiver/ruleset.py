@@ -4,6 +4,7 @@ from krules_core.event_types import SubjectPropertyChanged
 from firestore import WriteDocument, WriteGroupColumns
 from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA
 from krules_core.providers import subject_factory
+from datetime import datetime
 
 
 class UpdateGroupColumns(ProcessingFunction):
@@ -93,6 +94,40 @@ rulesdata: List[Rule] = [
                 group=lambda payload: payload['entity_base_info']['group'],
                 columns=lambda payload: payload["value"],
             )
+        ]
+    ),
+    Rule(
+        name="on-property-changed-update-event-sourcing",
+        subscribe_to=[SubjectPropertyChanged],
+        description=
+        """
+        Store state changes
+        """,
+        filters=[
+            SubjectNameMatch(
+                "^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
+                payload_dest="entity_base_info"
+            ),
+            OnSubjectPropertyChanged("current_state")
+        ],
+        processing=[
+            WriteDocument(
+                collection=lambda payload:
+                    f"event_sourcing",
+                    # f"{payload['entity_base_info']['subscription']}/event_sourcing/{payload['entity_base_info']['group']}",
+                data=lambda self: {
+                    "datetime": datetime.now().isoformat(),
+                    "subscription": self.payload['entity_base_info']['subscription'],
+                    "group": self.payload['entity_base_info']['group'],
+                    "id": self.payload['entity_base_info']['id'],
+                    "state": self.subject.get("current_state"),
+                    "changed_properties": [
+                        k for k, v in self.payload["value"].items() if k not in self.payload[
+                            "old_value"] or self.payload["old_value"].get(k) != v
+                    ],
+                    "origin_id": self.subject.event_info()["originid"]
+                }
+            ),
         ]
     ),
 ]

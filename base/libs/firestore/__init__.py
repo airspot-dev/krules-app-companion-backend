@@ -14,11 +14,14 @@ def get_readable_name(name):
 
 class WriteDocument(ProcessingFunction):
 
-    def execute(self, collection, document, data, subject_dest=None):
+    def execute(self, collection, data, document=None, subject_dest=None):
 
         db = firestore.client()
-        doc_ref = db.collection(collection).document(document)
-        doc_ref.set(data, merge=True)
+        if document is not None:
+            doc_ref = db.collection(collection).document(document)
+            doc_ref.set(data, merge=True)
+        else:
+            _, doc_ref = db.collection(collection).add(data)
         if subject_dest is not None:
             self.subject.set("current_state", doc_ref.get().to_dict())
 
