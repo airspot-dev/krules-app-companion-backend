@@ -1,8 +1,8 @@
 from krules_core.base_functions import *
 from krules_core.models import Rule
 from krules_core.event_types import SubjectPropertyChanged
-from firestore import WriteDocument, WriteGroupColumns
-from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA
+from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData
+from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, RESET_SCHEMA
 from krules_core.providers import subject_factory
 from datetime import datetime
 
@@ -10,12 +10,33 @@ from datetime import datetime
 class UpdateGroupColumns(ProcessingFunction):
 
     def execute(self, subscription, group, current_state):
-        subject = subject_factory(f'schema|{subscription}|{group}')
+        subject = subject_factory(f'schema|{subscription}|{group}', use_cache_default=False)
         subject.set("columns", lambda v: sorted(list(set((v or []) + list(current_state.keys())))))
+        self.payload["columns"] = subject.get("columns")
+        subject.store()
 
 
 rulesdata: List[Rule] = [
-
+    Rule(
+        name="ingestion-multi-receiver",
+        subscribe_to=[SUBJECT_PROPERTIES_DATA_MULTI],
+        description=
+        """
+            Pub/Sub multi message receiver from ingestion channels
+        """,
+        filters=[
+            SubjectNameMatch("^group[|](?P<subscription>.+)[|](?P<group>.+)$", payload_dest="base_info"),
+            Filter(lambda payload: "data" in payload and isinstance(payload["data"], dict) and len(payload["data"]))
+        ],
+        processing=[
+            RouteSubjectPropertiesData(
+                subscription=lambda payload: payload["base_info"]["subscription"],
+                group=lambda payload: payload["base_info"]["group"],
+                data=lambda payload: payload["data"],
+                entities_filter=lambda payload: payload["entities_filter"],
+            )
+        ]
+    ),
     Rule(
         name="ingestion-first-receiver",
         subscribe_to=[SUBJECT_PROPERTIES_DATA],
@@ -24,21 +45,24 @@ rulesdata: List[Rule] = [
             Pub/Sub message receiver from ingestion channels
         """,
         filters=[
-            SubjectNameMatch("^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$", payload_dest="entity_base_info"),
+            SubjectNameMatch("^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
+                             payload_dest="entity_base_info"),
             Filter(lambda payload: "data" in payload and isinstance(payload["data"], dict) and len(payload["data"]))
         ],
         processing=[
             WriteDocument(
                 collection=lambda payload:
-                    f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
+                f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
                 document=lambda payload: payload['entity_base_info']['id'],
                 data=lambda payload: payload["data"],
-                subject_dest="current_state"
+                subject_dest="current_state",
+                track_last_update=True
             ),
             SetSubjectProperties(
                 props=lambda payload: payload["data"],
                 unmuted="*"
             ),
+            StoreSubject()
         ]
     ),
     Rule(
@@ -113,21 +137,39 @@ rulesdata: List[Rule] = [
         processing=[
             WriteDocument(
                 collection=lambda payload:
-                    f"event_sourcing",
-                    # f"{payload['entity_base_info']['subscription']}/event_sourcing/{payload['entity_base_info']['group']}",
+                # f"event_sourcing",
+                f"{payload['entity_base_info']['subscription']}/event_sourcing/data",
                 data=lambda self: {
                     "datetime": datetime.now().isoformat(),
-                    "subscription": self.payload['entity_base_info']['subscription'],
+                    # "subscription": self.payload['entity_base_info']['subscription'],
                     "group": self.payload['entity_base_info']['group'],
-                    "id": self.payload['entity_base_info']['id'],
+                    "entity_id": self.payload['entity_base_info']['id'],
                     "state": self.subject.get("current_state"),
                     "changed_properties": [
-                        k for k, v in self.payload["value"].items() if k not in self.payload[
+                        k for k, v in self.payload["value"].items() if
+                        self.payload["old_value"] is None or k not in self.payload[
                             "old_value"] or self.payload["old_value"].get(k) != v
                     ],
                     "origin_id": self.subject.event_info()["originid"]
                 }
             ),
+        ]
+    ),
+    Rule(
+        name="reset-schema",
+        subscribe_to=[RESET_SCHEMA],
+        description=
+        """
+        Reset all
+        """,
+        filters=[
+            SubjectNameMatch(
+                "^schema[|](?P<subscription>.+)[|](?P<group>.+)$",
+                payload_dest="entity_base_info"
+            ),
+        ],
+        processing=[
+            FlushSubject()
         ]
     ),
 ]
