@@ -5,7 +5,8 @@ from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesDa
 from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, RESET_SCHEMA
 from krules_core.providers import subject_factory
 from datetime import datetime
-
+import os
+import json
 
 class UpdateGroupColumns(ProcessingFunction):
 
@@ -14,6 +15,7 @@ class UpdateGroupColumns(ProcessingFunction):
         subject.set("columns", lambda v: sorted(list(set((v or []) + list(current_state.keys())))))
         self.payload["columns"] = subject.get("columns")
         subject.store()
+
 
 
 rulesdata: List[Rule] = [
@@ -85,6 +87,11 @@ rulesdata: List[Rule] = [
                 group=lambda payload: payload["entity_base_info"]["group"],
                 current_state=lambda payload: payload["value"],
             ),
+            SetPayloadProperty("changed_properties", lambda payload: [
+                            k for k, v in payload["value"].items() if
+                            payload["old_value"] is None or k not in payload[
+                                "old_value"] or payload["old_value"].get(k) != v
+                            ]),
             Route(
                 event_type=ENTITY_STATE_CHANGED,
                 payload=lambda payload: {
@@ -93,8 +100,11 @@ rulesdata: List[Rule] = [
                     "group": payload["entity_base_info"]["group"],
                     "state": payload["value"],
                     "prev_state": payload["old_value"],
+                    "changed_properties": payload["changed_properties"],
                 },
-                dispatch_policy=DispatchPolicyConst.DIRECT
+                dispatch_policy=DispatchPolicyConst.DIRECT,
+                topic=os.environ["STATE_CHANGES_TOPIC"],
+                changed_properties= lambda payload: json.dumps(payload["changed_properties"]),
             )
         ]
     ),

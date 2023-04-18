@@ -101,7 +101,7 @@ resource "google_eventarc_trigger" "pubsub-ingestion-message-published" {
     }
     transport {
         pubsub {
-            topic     = "app-companion-ingestion-${each.key}"
+            topic     = "${var.project_name}-ingestion-${each.key}"
         }
     }
     destination {
