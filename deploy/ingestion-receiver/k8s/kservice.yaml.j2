@@ -29,6 +29,8 @@ spec:
           value: {{ project_name }}
         - name: TARGET
           value: {{ target }}
+        - name: STATE_CHANGES_TOPIC
+          value: {{ project_name }}-state-changes-{{ target }}
         - name: REDIS_HOST
           value: 10.145.144.115
         - name: REDIS_PORT
