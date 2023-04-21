@@ -18,6 +18,21 @@ def get_readable_name(name):
     return name.replace("-", " ").replace("_", " ").replace(".", " ").replace(":", " ").replace("|", " ").capitalize()
 
 
+def delete_collection(coll_ref, batch_size=10):
+    docs = coll_ref.list_documents(page_size=batch_size)
+    deleted = 0
+
+    for doc in docs:
+        print(f'Deleting doc {doc.id} => {doc.get().to_dict()}')
+        for col in doc.collections():
+            delete_collection(col, batch_size)
+        doc.delete()
+        deleted = deleted + 1
+
+    if deleted >= batch_size:
+        return delete_collection(coll_ref, batch_size)
+
+
 class WriteDocument(ProcessingFunction):
 
     def execute(self, collection, data, document=None, subject_dest=None, track_last_update=False):
@@ -64,12 +79,33 @@ class RouteSubjectPropertiesData(ProcessingFunction):
     def execute(self, subscription, group, data, entities_filter=None):
 
         db = firestore.client()
-        # docs = db.collection(f"{subscription}/groups/{group}").where(entities_filter).stream()
-        docs = db.collection(f"{subscription}/groups/{group}").stream()
+        if entities_filter is not None:
+            docs = db.collection(f"{subscription}/groups/{group}").where(entities_filter).stream()
+        else:
+            docs = db.collection(f"{subscription}/groups/{group}").stream()
         for doc in docs:
-            if entities_filter is None or re.match(entities_filter, doc.id):
-                self.router.route(
-                    subject=f"entity|{subscription}|{group}|{doc.id}",
-                    event_type=SUBJECT_PROPERTIES_DATA,
-                    payload=data
-                )
+            # if entities_filter is None or re.match(entities_filter, doc.id):
+            self.router.route(
+                subject=f"entity|{subscription}|{group}|{doc.id}",
+                event_type=SUBJECT_PROPERTIES_DATA,
+                payload=data
+            )
+
+
+class DeleteDocument(ProcessingFunction):
+
+    def execute(self, collection, document):
+
+        db = firestore.client()
+        doc = db.collection(collection).document(document)
+        for col in doc.collections():
+            delete_collection(col)
+        doc.delete()
+
+
+class DeleteCollection(ProcessingFunction):
+
+    def execute(self, collection):
+
+        db = firestore.client()
+        delete_collection(db.collection(collection))

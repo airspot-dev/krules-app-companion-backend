@@ -1,8 +1,9 @@
 from krules_core.base_functions import *
 from krules_core.models import Rule
 from krules_core.event_types import SubjectPropertyChanged
-from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData
-from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, RESET_SCHEMA
+from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData, DeleteDocument, DeleteCollection
+from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, \
+    DELETE_GROUP, DELETE_ENTITY
 from krules_core.providers import subject_factory
 from datetime import datetime
 
@@ -138,11 +139,11 @@ rulesdata: List[Rule] = [
             WriteDocument(
                 collection=lambda payload:
                 # f"event_sourcing",
-                f"{payload['entity_base_info']['subscription']}/event_sourcing/data",
+                f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}/{payload['entity_base_info']['id']}/event_sourcing",
                 data=lambda self: {
                     "datetime": datetime.now().isoformat(),
                     # "subscription": self.payload['entity_base_info']['subscription'],
-                    "group": self.payload['entity_base_info']['group'],
+                    # "group": self.payload['entity_base_info']['group'],
                     "entity_id": self.payload['entity_base_info']['id'],
                     "state": self.subject.get("current_state"),
                     "changed_properties": [
@@ -156,20 +157,54 @@ rulesdata: List[Rule] = [
         ]
     ),
     Rule(
-        name="reset-schema",
-        subscribe_to=[RESET_SCHEMA],
+        name="delete-group",
+        subscribe_to=[DELETE_GROUP],
         description=
         """
-        Reset all
+        Delete group
         """,
         filters=[
             SubjectNameMatch(
-                "^schema[|](?P<subscription>.+)[|](?P<group>.+)$",
+                "^group[|](?P<subscription>.+)[|](?P<group>.+)$",
                 payload_dest="entity_base_info"
             ),
         ],
         processing=[
+            DeleteCollection(
+                collection=lambda payload:
+                f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}"
+            ),
+            Process(
+                lambda payload: subject_factory(f"schema|{payload['entity_base_info']['subscription']}|{payload['entity_base_info']['group']}").flush()
+            ),
+            SetPayloadProperty("collection", lambda payload: f"{payload['entity_base_info']['subscription']}/settings/schemas"),
+            SetPayloadProperty("document", lambda payload: payload['entity_base_info']['group']),
+            DeleteDocument(
+                collection=lambda payload: f"{payload['entity_base_info']['subscription']}/settings/schemas",
+                document=lambda payload: payload['entity_base_info']['group']
+            ),
             FlushSubject()
+        ]
+    ),
+    Rule(
+        name="delete-entity",
+        subscribe_to=[DELETE_ENTITY],
+        description=
+        """
+        Delete entity
+        """,
+        filters=[
+            SubjectNameMatch(
+                "^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
+                payload_dest="entity_base_info"
+            ),
+        ],
+        processing=[
+            DeleteDocument(
+                collection=lambda payload: f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
+                document=lambda payload: payload['entity_base_info']['id']
+            ),
+            FlushSubject(),
         ]
     ),
 ]
