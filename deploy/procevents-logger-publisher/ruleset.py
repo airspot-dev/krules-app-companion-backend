@@ -12,6 +12,7 @@ rulesdata: List[Rule] = [
     Rule(
         name="send-procevent-to-gcp-logger",
         processing=[
+            Process(lambda payload: payload.pop("_event_info")),
             Process(
                 lambda payload: (
                     logger.log_struct(

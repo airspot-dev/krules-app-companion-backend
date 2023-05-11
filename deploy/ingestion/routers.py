@@ -11,6 +11,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 from common.event_types import SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, DELETE_GROUP, DELETE_ENTITY
 from fastapi.security.api_key import APIKeyHeader
 from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
 import google.auth.exceptions
 import os
 
@@ -66,6 +67,11 @@ async def check_firebase_user(header: str = Security(firestore_token_header), ap
             return claims
 
 
+class GroupUpdatePayload(BaseModel):
+    data: dict
+    entities_filter: Optional[list | None]
+
+
 @router.delete("/{subscription}/{group}", summary="Delete group")
 async def delete_group(subscription, group: str, token: APIKey = Depends(check_firebase_user)):
     event_router_factory().route(
@@ -89,16 +95,16 @@ async def delete_entity(subscription, group, entity_id: str, token: APIKey = Dep
 
 
 @router.post("/{subscription}/{group}")
-async def ingestion_data(subscription, group, data: dict, entities_filter: Optional[str | None], api_key: APIKey = Depends(get_api_key)):
+async def ingestion_data(subscription, group, body: GroupUpdatePayload, api_key: APIKey = Depends(get_api_key)):
     # data = await request.json()
-    if entities_filter is None:
-        entities_filter = ""
+    if body.entities_filter is None:
+        body.entities_filter = []
     event_router_factory().route(
         subject=f'group|{subscription}|{group}',
         event_type=SUBJECT_PROPERTIES_DATA_MULTI,
         payload={
-            "data": data,
-            "entities_filter": entities_filter,
+            "data": body.data,
+            "entities_filter": body.entities_filter,
         }
     )
 

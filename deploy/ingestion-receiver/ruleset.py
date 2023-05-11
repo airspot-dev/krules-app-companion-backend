@@ -187,8 +187,6 @@ rulesdata: List[Rule] = [
             Process(
                 lambda payload: subject_factory(f"schema|{payload['entity_base_info']['subscription']}|{payload['entity_base_info']['group']}").flush()
             ),
-            SetPayloadProperty("collection", lambda payload: f"{payload['entity_base_info']['subscription']}/settings/schemas"),
-            SetPayloadProperty("document", lambda payload: payload['entity_base_info']['group']),
             DeleteDocument(
                 collection=lambda payload: f"{payload['entity_base_info']['subscription']}/settings/schemas",
                 document=lambda payload: payload['entity_base_info']['group']

@@ -79,16 +79,21 @@ class RouteSubjectPropertiesData(ProcessingFunction):
     def execute(self, subscription, group, data, entities_filter=None):
 
         db = firestore.client()
-        if entities_filter is not None:
-            docs = db.collection(f"{subscription}/groups/{group}").where(entities_filter).stream()
+        if isinstance(entities_filter, str):
+            entities_filter = eval(entities_filter)
+        if entities_filter is not None and len(entities_filter) > 0:
+            docs = db.collection(f"{subscription}/groups/{group}").where(*entities_filter).stream()
         else:
             docs = db.collection(f"{subscription}/groups/{group}").stream()
+        self.payload["entities"] = []
         for doc in docs:
-            # if entities_filter is None or re.match(entities_filter, doc.id):
+            self.payload["entities"].append(f"entity|{subscription}|{group}|{doc.id}")
             self.router.route(
                 subject=f"entity|{subscription}|{group}|{doc.id}",
                 event_type=SUBJECT_PROPERTIES_DATA,
-                payload=data
+                payload={
+                    "data": data
+                }
             )
 
 
