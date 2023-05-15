@@ -1,0 +1,4 @@
+pydantic>=1.9.1
+cloudevents==1.7.1
+google-cloud-pubsub==2.13.11
+google-auth

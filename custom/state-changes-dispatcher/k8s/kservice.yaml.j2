@@ -4,8 +4,8 @@ metadata:
   name: {{ app_name }}
   namespace: {{ namespace }}
   annotations:
-    run.googleapis.com/ingress: all
-    run.googleapis.com/ingress-status: all
+    run.googleapis.com/ingress: internal
+    run.googleapis.com/ingress-status: internal
 spec:
   template:
     spec:

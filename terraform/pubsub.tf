@@ -14,20 +14,6 @@ resource "google_pubsub_topic" "ingestion" {
   message_retention_duration = "86600s"
 }
 
-resource "google_pubsub_topic" "state-changes" {
-
-  for_each = var.targets
-
-  name = "${var.project_name}-state-changes-${each.key}"
-  project = "${each.value.project_id}"
-
-  labels = {
-    app = "${var.project_name}"
-  }
-
-  message_retention_duration = "86600s"
-}
-
 resource "google_pubsub_topic" "procevents" {
 
   for_each = var.targets

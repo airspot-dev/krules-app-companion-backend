@@ -58,55 +58,13 @@ rulesdata: List[Rule] = [
                 f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
                 document=lambda payload: payload['entity_base_info']['id'],
                 data=lambda payload: payload["data"],
-                subject_dest="current_state",
                 track_last_update=True
             ),
-            SetSubjectProperties(
-                props=lambda payload: payload["data"],
-                unmuted="*"
-            ),
-            StoreSubject()
-        ]
-    ),
-    Rule(
-        name="property-changed-propagation",
-        subscribe_to=[SubjectPropertyChanged],
-        description=
-        """
-        Propagate subject property changed event
-        """,
-        filters=[
-            SubjectNameMatch(
-                "^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
-                payload_dest="entity_base_info"
-            ),
-            OnSubjectPropertyChanged("current_state")
-        ],
-        processing=[
             UpdateGroupColumns(
                 subscription=lambda payload: payload["entity_base_info"]["subscription"],
                 group=lambda payload: payload["entity_base_info"]["group"],
                 current_state=lambda payload: payload["value"],
             ),
-            SetPayloadProperty("changed_properties", lambda payload: [
-                            k for k, v in payload["value"].items() if
-                            payload["old_value"] is None or k not in payload[
-                                "old_value"] or payload["old_value"].get(k) != v
-                            ]),
-            Route(
-                event_type=ENTITY_STATE_CHANGED,
-                payload=lambda payload: {
-                    "id": payload["entity_base_info"]["id"],
-                    "subscription": payload["entity_base_info"]["subscription"],
-                    "group": payload["entity_base_info"]["group"],
-                    "state": payload["value"],
-                    "prev_state": payload["old_value"],
-                    "changed_properties": payload["changed_properties"],
-                },
-                dispatch_policy=DispatchPolicyConst.DIRECT,
-                topic=os.environ["STATE_CHANGES_TOPIC"],
-                changed_properties=lambda payload: json.dumps(payload["changed_properties"]),
-            )
         ]
     ),
     Rule(
@@ -129,42 +87,6 @@ rulesdata: List[Rule] = [
                 group=lambda payload: payload['entity_base_info']['group'],
                 columns=lambda payload: payload["value"],
             )
-        ]
-    ),
-    Rule(
-        name="on-property-changed-update-event-sourcing",
-        subscribe_to=[SubjectPropertyChanged],
-        description=
-        """
-        Store state changes
-        """,
-        filters=[
-            SubjectNameMatch(
-                "^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
-                payload_dest="entity_base_info"
-            ),
-            OnSubjectPropertyChanged("current_state"),
-            Filter(False)
-        ],
-        processing=[
-            WriteDocument(
-                collection=lambda payload:
-                # f"event_sourcing",
-                f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}/{payload['entity_base_info']['id']}/event_sourcing",
-                data=lambda self: {
-                    "datetime": datetime.now().isoformat(),
-                    # "subscription": self.payload['entity_base_info']['subscription'],
-                    # "group": self.payload['entity_base_info']['group'],
-                    "entity_id": self.payload['entity_base_info']['id'],
-                    "state": self.subject.get("current_state"),
-                    "changed_properties": [
-                        k for k, v in self.payload["value"].items() if
-                        self.payload["old_value"] is None or k not in self.payload[
-                            "old_value"] or self.payload["old_value"].get(k) != v
-                    ],
-                    "origin_id": self.subject.event_info()["originid"]
-                }
-            ),
         ]
     ),
     Rule(
