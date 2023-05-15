@@ -2,9 +2,6 @@ from firebase_admin import credentials, firestore
 import firebase_admin
 from krules_core.base_functions import ProcessingFunction
 from datetime import datetime
-import re
-
-from krules_core.providers import subject_factory
 
 from common.event_types import SUBJECT_PROPERTIES_DATA
 

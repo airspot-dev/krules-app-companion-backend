@@ -32,3 +32,14 @@ spec:
           value: {{ target }}
         - name: GOOGLE_CLOUD_PROJECT
           value: {{ project_id }}
+        volumeMounts:
+        - name: firebase-auth
+          readOnly: true
+          mountPath: /var/secrets/firebase
+      volumes:
+      - name: firebase-auth
+        secret:
+          secretName: firebase-auth
+          items:
+          - key: latest
+            path: firebase-auth

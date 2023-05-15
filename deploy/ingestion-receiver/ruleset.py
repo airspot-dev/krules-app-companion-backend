@@ -105,7 +105,7 @@ rulesdata: List[Rule] = [
                 },
                 dispatch_policy=DispatchPolicyConst.DIRECT,
                 topic=os.environ["STATE_CHANGES_TOPIC"],
-                changed_properties= lambda payload: json.dumps(payload["changed_properties"]),
+                changed_properties=lambda payload: json.dumps(payload["changed_properties"]),
             )
         ]
     ),
@@ -143,7 +143,8 @@ rulesdata: List[Rule] = [
                 "^entity[|](?P<subscription>.+)[|](?P<group>.+)[|](?P<id>.+)$",
                 payload_dest="entity_base_info"
             ),
-            OnSubjectPropertyChanged("current_state")
+            OnSubjectPropertyChanged("current_state"),
+            Filter(False)
         ],
         processing=[
             WriteDocument(
