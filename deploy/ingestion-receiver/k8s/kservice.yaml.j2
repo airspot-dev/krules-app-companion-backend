@@ -2,7 +2,7 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: {{ app_name }}
-  namespace: {{ namespace }}
+  # namespace: {{ namespace }}
 spec:
   template:
     metadata:
@@ -18,7 +18,7 @@ spec:
         env:
         {% if target == "dev" %}
         - name: PUBLISH_PROCEVENTS_LEVEL
-          value: "2"
+          value: "0"
         - name: PUBLISH_PROCEVENTS_MATCHING
           value: "*"
         {% else %}
@@ -34,9 +34,9 @@ spec:
         - name: REDIS_HOST
           value: 10.145.144.115
         - name: REDIS_PORT
-          value: 6379
+          value: "6379"
         - name: REDIS_DB
-          value: 0
+          value: "0"
         - name: REDIS_AUTH
           valueFrom:
             secretKeyRef:

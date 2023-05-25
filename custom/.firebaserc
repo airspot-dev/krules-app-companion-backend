@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "airspot-krules-companion-dev": {
+      "hosting": {
+        "krules": [
+          "krules-companion-dev"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "airspot-krules-companion-dev"
+  }
+}

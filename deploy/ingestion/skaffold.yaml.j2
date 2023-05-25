@@ -4,11 +4,20 @@ kind: Config
 build:
   artifacts:
     - image: {{ app_name }}
-      context: ".build"
+  {% if use_cloudbuild%}
   googleCloudBuild:
     projectId: {{ project_id }}
+  {% else %}
+  local:
+    useDockerCLI: false
+    useBuildkit: false
+  {% endif %}
 deploy:
+  {% if use_cloudrun %}
   cloudrun: {}
+  {% else %}
+  kubectl: {}
+  {% endif %}
 profiles:
 {% for target in targets %}
   - name: {{ target }}

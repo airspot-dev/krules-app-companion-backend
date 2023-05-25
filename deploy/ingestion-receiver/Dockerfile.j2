@@ -6,6 +6,7 @@ RUN cd /app/{{ user_lib }} && test -f requirements.txt && pip3 install -r requir
 {% endfor %}
 
 RUN pip install google-auth==2.17.2
-ADD ruleset.py /app/ruleset.py
-ADD routers.py /app/routers.py
-ADD env.py /app/env.py
+
+{% for source in sources %}
+ADD {{ source }} /app/{{ source }}
+{% endfor %}
