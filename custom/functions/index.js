@@ -28,7 +28,7 @@ exports.storeEventSourcing = onDocumentWritten("/{subscription}/groups/{groupNam
       }
   }
 
-  const writeResult = await getFirestore()
+  await getFirestore()
       .collection(event.params.subscription + "/groups/" + event.params.groupName + "/" + event.params.entityId + "/event_sourcing")
       .add(
           {
