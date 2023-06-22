@@ -5,7 +5,7 @@ from starlette.requests import Request
 from google.events.cloud import firestore
 import firebase_admin
 from firebase_admin import firestore as firestore_client
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 collection_regex = re.compile("^(?P<subscription>.+)[/]groups[/](?P<group>.+)[/](?P<entity_id>.+)$")
 
@@ -42,11 +42,12 @@ def map_value_to_plain_dict(obj):
 
 @router.post("")
 async def dispatch(request: Request):
+    if int(os.environ.get("EVENT_SOURCING_DISABLED", "0")):
+        return
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
     docs_path = f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/databases/{os.environ.get('FIRESTORE_DATABASE', '(default)')}/documents/"
     collection = payload.value.name.replace(docs_path, "")
-    print(f"@@@@@@@ collection: {collection}")
     match = collection_regex.match(collection)
     if match is not None:
         collection_info = match.groupdict()
@@ -55,18 +56,22 @@ async def dispatch(request: Request):
         if "/" in group:
             return
         entity_id = collection_info["entity_id"]
-        state = map_value_to_plain_dict(payload.value)
         try:
+            settings = db.document(f"{subscription}/settings/schemas/{group}").get()
+            if settings is not None:
+                settings = settings.to_dict()
+                ttl = settings.get("ttl", {"hours": 24})
+            else:
+                ttl = {"hours": 24}
             _, doc_ref = db.collection(f"{subscription}/groups/{group}/{entity_id}/event_sourcing").add({
-                    "datetime": datetime.now(timezone.utc).isoformat(),
+                    "datetime": datetime.now(timezone.utc),
+                    "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
                     "entity_id": entity_id,
                     "state": map_value_to_plain_dict(payload.value),
                     "changed_properties": [el for el in list(payload.update_mask.field_paths) if el != "LAST_UPDATE"],
                 }
             )
         except Exception as ex:
-            print(f"@@@@@@@ collection_info: {collection_info}")
-            print(f"###### state : {state}")
             raise ex
 
 routers = [router]

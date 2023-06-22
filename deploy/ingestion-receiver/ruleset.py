@@ -2,27 +2,26 @@ from krules_core.base_functions import *
 from krules_core.models import Rule
 from krules_core.event_types import SubjectPropertyChanged
 from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData, DeleteDocument, DeleteCollection
-from common.event_types import ENTITY_STATE_CHANGED, SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, \
-    DELETE_GROUP, DELETE_ENTITY
+from common.event_types import IngestionEventsV1
 from krules_core.providers import subject_factory
 from datetime import datetime
 import os
 import json
 
+
 class UpdateGroupColumns(ProcessingFunction):
 
     def execute(self, subscription, group, current_state):
         subject = subject_factory(f'schema|{subscription}|{group}', use_cache_default=False)
-        subject.set("columns", lambda v: sorted(list(set((v or []) + list(current_state.keys())))))
+        subject.set("columns", lambda v: sorted(list(set((v or []) + [k for k in current_state if k != "LAST_UPDATE"]))))
         self.payload["columns"] = subject.get("columns")
         subject.store()
-
 
 
 rulesdata: List[Rule] = [
     Rule(
         name="ingestion-multi-receiver",
-        subscribe_to=[SUBJECT_PROPERTIES_DATA_MULTI],
+        subscribe_to=[IngestionEventsV1.GROUP_DATA],
         description=
         """
             Pub/Sub multi message receiver from ingestion channels
@@ -42,7 +41,7 @@ rulesdata: List[Rule] = [
     ),
     Rule(
         name="ingestion-first-receiver",
-        subscribe_to=[SUBJECT_PROPERTIES_DATA],
+        subscribe_to=[IngestionEventsV1.ENTITY_DATA],
         description=
         """
             Pub/Sub message receiver from ingestion channels
@@ -63,7 +62,7 @@ rulesdata: List[Rule] = [
             UpdateGroupColumns(
                 subscription=lambda payload: payload["entity_base_info"]["subscription"],
                 group=lambda payload: payload["entity_base_info"]["group"],
-                current_state=lambda payload: payload["value"],
+                current_state=lambda payload: payload["data"],
             ),
         ]
     ),
@@ -91,7 +90,7 @@ rulesdata: List[Rule] = [
     ),
     Rule(
         name="delete-group",
-        subscribe_to=[DELETE_GROUP],
+        subscribe_to=[IngestionEventsV1.GROUP_DELETE],
         description=
         """
         Delete group
@@ -119,7 +118,7 @@ rulesdata: List[Rule] = [
     ),
     Rule(
         name="delete-entity",
-        subscribe_to=[DELETE_ENTITY],
+        subscribe_to=[IngestionEventsV1.ENTITY_DELETE],
         description=
         """
         Delete entity

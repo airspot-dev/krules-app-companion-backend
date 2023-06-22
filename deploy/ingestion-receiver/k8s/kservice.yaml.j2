@@ -46,6 +46,10 @@ spec:
           value: {{ project_name }}-default-sink-{{ target }}
         - name: PUBSUB_PROCEVENTS_SINK
           value: {{ project_name }}-procevents-{{ target }}
+        - name: REDIS_KEY_PREFIX
+          value: {{ project_name }}-{{ target }}
+        - name: REDIS_URL
+          value: redis://:b3dc2c56-8674-4244-af50-fa31355915f5@10.145.144.115:6379/0
         volumeMounts:
         - name: firebase-auth
           readOnly: true

@@ -8,7 +8,7 @@ from fastapi import Request, Header, Security, HTTPException, Depends
 from krules_core.providers import event_router_factory
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 
-from common.event_types import SUBJECT_PROPERTIES_DATA, SUBJECT_PROPERTIES_DATA_MULTI, DELETE_GROUP, DELETE_ENTITY
+from common.event_types import IngestionEventsV1
 from fastapi.security.api_key import APIKeyHeader
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -76,7 +76,7 @@ class GroupUpdatePayload(BaseModel):
 async def delete_group(subscription, group: str, token: APIKey = Depends(check_firebase_user)):
     event_router_factory().route(
         subject=f'group|{subscription}|{group}',
-        event_type=DELETE_GROUP,
+        event_type=IngestionEventsV1.GROUP_DELETE,
         payload={
             "token": token
         }
@@ -87,7 +87,7 @@ async def delete_group(subscription, group: str, token: APIKey = Depends(check_f
 async def delete_entity(subscription, group, entity_id: str, token: APIKey = Depends(check_firebase_user)):
     event_router_factory().route(
         subject=f'entity|{subscription}|{group}|{entity_id}',
-        event_type=DELETE_ENTITY,
+        event_type=IngestionEventsV1.ENTITY_DELETE,
         payload={
             "token": token
         }
@@ -101,7 +101,7 @@ async def ingestion_data(subscription, group, body: GroupUpdatePayload, api_key:
         body.entities_filter = []
     event_router_factory().route(
         subject=f'group|{subscription}|{group}',
-        event_type=SUBJECT_PROPERTIES_DATA_MULTI,
+        event_type=IngestionEventsV1.GROUP_DATA,
         payload={
             "data": body.data,
             "entities_filter": body.entities_filter,
@@ -114,7 +114,7 @@ async def ingestion_data(subscription, group, entity_id, data: dict, api_key: AP
     # data = await request.json()
     event_router_factory().route(
         subject=f'entity|{subscription}|{group}|{entity_id}',
-        event_type=SUBJECT_PROPERTIES_DATA,
+        event_type=IngestionEventsV1.ENTITY_DATA,
         payload={
             "data": data
         }

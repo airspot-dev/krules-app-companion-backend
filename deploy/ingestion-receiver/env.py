@@ -10,9 +10,9 @@ TOPIC_NAME = os.environ.get("PUBSUB_SINK")
 if TOPIC_NAME is None:
     raise EnvironmentError("PUBSUB_SINK must be defined")
 
-TARGET = os.environ.get("TARGET")
-if TARGET is None:
-    raise EnvironmentError("TARGET must be defined in environ")
+# TARGET = os.environ.get("TARGET")
+REDIS_URL = os.environ["REDIS_URL"]
+REDIS_KEY_PREFIX = os.environ.get("REDIS_KEY_PREFIX", os.environ['PROJECT_NAME'])
 
 _, PROJECT = google.auth.default()
 
@@ -46,8 +46,9 @@ def init():
             lambda name, **kwargs:
                   SubjectsRedisStorage(
                       name,
-                      f"redis://:{os.environ['REDIS_AUTH']}@{os.environ['REDIS_HOST']}:{os.environ['REDIS_PORT']}/{os.environ['REDIS_DB']}",
-                      key_prefix=f"{os.environ['PROJECT_NAME']}-{os.environ['TARGET']}"
+                      REDIS_URL,
+                      # f"redis://:{os.environ['REDIS_AUTH']}@{os.environ['REDIS_HOST']}:{os.environ['REDIS_PORT']}/{os.environ['REDIS_DB']}",
+                      key_prefix=REDIS_KEY_PREFIX
                   )
         )
     )

@@ -1,9 +1,9 @@
 from firebase_admin import credentials, firestore
 import firebase_admin
 from krules_core.base_functions import ProcessingFunction
-from datetime import datetime
+from datetime import datetime, timezone
 
-from common.event_types import SUBJECT_PROPERTIES_DATA
+from common.event_types import IngestionEventsV1
 
 FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
 
@@ -36,7 +36,7 @@ class WriteDocument(ProcessingFunction):
 
         db = firestore.client()
         if track_last_update:
-            data["LAST_UPDATE"] = datetime.now().isoformat()
+            data["LAST_UPDATE"] = datetime.now(timezone.utc)
         if document is not None:
             doc_ref = db.collection(collection).document(document)
             doc_ref.set(data, merge=True)
@@ -87,7 +87,7 @@ class RouteSubjectPropertiesData(ProcessingFunction):
             self.payload["entities"].append(f"entity|{subscription}|{group}|{doc.id}")
             self.router.route(
                 subject=f"entity|{subscription}|{group}|{doc.id}",
-                event_type=SUBJECT_PROPERTIES_DATA,
+                event_type=IngestionEventsV1.ENTITY_DATA,
                 payload={
                     "data": data
                 }
