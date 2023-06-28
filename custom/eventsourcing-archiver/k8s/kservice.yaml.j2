@@ -8,6 +8,10 @@ metadata:
     run.googleapis.com/ingress-status: all
 spec:
   template:
+    metadata:
+      annotations:
+        run.googleapis.com/vpc-access-egress: all-traffic
+        run.googleapis.com/vpc-access-connector: projects/airspot-krules-companion-dev/locations/europe-west4/connectors/redis-connector
     spec:
       containers:
       - name: {{ app_name }}
@@ -32,3 +36,7 @@ spec:
           value: {{ target }}
         - name: GOOGLE_CLOUD_PROJECT
           value: {{ project_id }}
+        - name: REDIS_KEY_PREFIX
+          value: {{ project_name }}-{{ target }}
+        - name: REDIS_URL
+          value: redis://:b3dc2c56-8674-4244-af50-fa31355915f5@10.145.144.115:6379/0
