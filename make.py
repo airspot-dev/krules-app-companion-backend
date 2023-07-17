@@ -37,14 +37,17 @@ TARGET_DICTS = sane_utils.get_target_dicts(TARGETS, (
     "clouddeploy_region",
 ))
 
-sane_utils.google.make_enable_apis_recipe([
-    "storage.googleapis.com",
-    "compute.googleapis.com",
-    "artifactregistry.googleapis.com",
-    "cloudbuild.googleapis.com",
-    "clouddeploy.googleapis.com",
-    "run.googleapis.com",
-])
+sane_utils.google.make_enable_apis_recipe(
+    project_id=sane_utils.get_var_for_target('PROJECT_ID', TARGETS[0], True),
+    google_apis = [
+        "storage.googleapis.com",
+        "compute.googleapis.com",
+        "artifactregistry.googleapis.com",
+        "cloudbuild.googleapis.com",
+        "clouddeploy.googleapis.com",
+        "run.googleapis.com",
+    ]
+)
 
 REGION = sane_utils.get_var_for_target('REGION', TARGETS[0], True)
 sane_utils.google.make_check_gcloud_config_recipe(
@@ -99,6 +102,7 @@ sane_utils.make_render_resource_recipes(
 )
 
 sane_utils.google.make_ensure_gcs_bucket_recipe(
+    project_id=sane_utils.get_var_for_target('PROJECT_ID', TARGETS[0], True),
     bucket_name=TF_BACKEND,
     # location=TF_BACKEND_LOCATION,
     hooks=[
