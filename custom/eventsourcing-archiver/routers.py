@@ -63,14 +63,6 @@ async def dispatch(request: Request):
             ttl = {k: int(v) for k, v in subject.get("ttl").items()}
         else:
             ttl = {"hours": 24}
-            subject.set("ttl", ttl, muted=True)
-        # try:
-            # settings = db.document(f"{subscription}/settings/schemas/{group}").get()
-            # if settings is not None:
-            #     settings = settings.to_dict()
-            #     ttl = settings.get("ttl", {"hours": 24})
-            # else:
-            #     ttl = {"hours": 24}
         _, doc_ref = db.collection(f"{subscription}/groups/{group}/{entity_id}/event_sourcing").add({
                 "datetime": datetime.now(timezone.utc),
                 "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
@@ -79,8 +71,6 @@ async def dispatch(request: Request):
                 "changed_properties": [el for el in list(payload.update_mask.field_paths) if el != "LAST_UPDATE"],
             }
         )
-        # except Exception as ex:
-        #     raise ex
 
 import logging
 
