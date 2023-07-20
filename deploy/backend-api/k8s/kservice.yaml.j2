@@ -2,16 +2,11 @@ apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: {{ app_name }}
-  namespace: {{ namespace }}
   annotations:
-    run.googleapis.com/ingress: internal
-    run.googleapis.com/ingress-status: internal
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+    run.googleapis.com/ingress-status: internal-and-cloud-load-balancing
 spec:
   template:
-    metadata:
-      annotations:
-        run.googleapis.com/vpc-access-egress: private-ranges-only
-        run.googleapis.com/vpc-access-connector: projects/airspot-krules-companion-dev/locations/europe-west4/connectors/host-vpc-access-eu-west4
     spec:
       containers:
       - name: {{ app_name }}
@@ -36,7 +31,8 @@ spec:
           value: {{ target }}
         - name: GOOGLE_CLOUD_PROJECT
           value: {{ project_id }}
-        - name: REDIS_KEY_PREFIX
-          value: {{ project_name }}-{{ target }}
-        - name: REDIS_URL
-          value: redis://:804b4198-f01a-4cdd-bb7b-dd4718e78371@10.16.16.3:6379/0
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: '1'
+              name: ingestion-api-key
