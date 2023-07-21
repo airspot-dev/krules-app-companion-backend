@@ -21,9 +21,9 @@ spec:
         env:
         {% if target == "dev" %}
         - name: PUBLISH_PROCEVENTS_LEVEL
-          value: "0"
+          value: "2"
         - name: PUBLISH_PROCEVENTS_MATCHING
-          value: "*"
+          value: "got_errors=true"
         {% else %}
         - name: PUBLISH_PROCEVENTS_LEVEL
           value: "0"

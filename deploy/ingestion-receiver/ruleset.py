@@ -1,7 +1,8 @@
 from krules_core.base_functions import *
 from krules_core.models import Rule
 from krules_core.event_types import SubjectPropertyChanged
-from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData, DeleteDocument, DeleteCollection
+from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesData, DeleteDocument, DeleteCollection, \
+    UpdateDocument
 from common.event_types import IngestionEventsV1
 from krules_core.providers import subject_factory
 from datetime import datetime
@@ -102,6 +103,11 @@ rulesdata: List[Rule] = [
             ),
         ],
         processing=[
+            UpdateDocument(
+                collection=lambda payload: f"{payload['entity_base_info']['subscription']}/settings/schemas",
+                document=lambda payload: payload['entity_base_info']['group'],
+                data={"_deleting": True}
+            ),
             DeleteCollection(
                 collection=lambda payload:
                 f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}"
@@ -130,6 +136,11 @@ rulesdata: List[Rule] = [
             ),
         ],
         processing=[
+            UpdateDocument(
+                collection=lambda payload: f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
+                document=lambda payload: payload['entity_base_info']['id'],
+                data={"_deleting": True}
+            ),
             DeleteDocument(
                 collection=lambda payload: f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
                 document=lambda payload: payload['entity_base_info']['id']

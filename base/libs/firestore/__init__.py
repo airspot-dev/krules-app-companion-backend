@@ -36,7 +36,7 @@ class WriteDocument(ProcessingFunction):
 
         db = firestore.client()
         if track_last_update:
-            data["LAST_UPDATE"] = datetime.now(timezone.utc)
+            data["_last_update"] = datetime.now(timezone.utc)
         if document is not None:
             doc_ref = db.collection(collection).document(document)
             doc_ref.set(data, merge=True)
@@ -45,7 +45,7 @@ class WriteDocument(ProcessingFunction):
         if subject_dest is not None:
             current_state = doc_ref.get().to_dict()
             if track_last_update:
-                current_state.pop("LAST_UPDATE")
+                current_state.pop("_last_update")
             self.subject.set(subject_dest, current_state)
 
 
@@ -69,6 +69,14 @@ class WriteGroupColumns(ProcessingFunction):
                         "rules": []
                     }
                 )
+
+
+class UpdateDocument(ProcessingFunction):
+
+    def execute(self, collection: str, document: str, data: dict):
+        db = firestore.client()
+        doc_ref = db.collection(collection).document(document)
+        doc_ref.update(data)
 
 
 class RouteSubjectPropertiesData(ProcessingFunction):
