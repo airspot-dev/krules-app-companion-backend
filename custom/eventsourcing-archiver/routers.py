@@ -68,7 +68,7 @@ async def dispatch(request: Request):
                 "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
                 "entity_id": entity_id,
                 "state": map_value_to_plain_dict(payload.value),
-                "changed_properties": [el for el in list(payload.update_mask.field_paths) if el != "LAST_UPDATE"],
+                "changed_properties": [el for el in list(payload.update_mask.field_paths) if el != "_last_update"],
             }
         )
 
