@@ -14,7 +14,7 @@ class UpdateGroupColumns(ProcessingFunction):
 
     def execute(self, subscription, group, current_state):
         subject = subject_factory(f'schema|{subscription}|{group}', use_cache_default=False)
-        subject.set("columns", lambda v: sorted(list(set((v or []) + [k for k in current_state if k != "_last_update"]))))
+        subject.set("columns", lambda v: sorted(list(set((v or []) + [k for k in current_state if not k.startswith("_")]))))
         self.payload["columns"] = subject.get("columns")
         subject.store()
 

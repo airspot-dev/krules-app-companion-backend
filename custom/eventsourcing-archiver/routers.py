@@ -7,6 +7,9 @@ import firebase_admin
 from firebase_admin import firestore as firestore_client
 from datetime import datetime, timezone, timedelta
 from krules_core.providers import subject_factory
+import logging
+
+logger = logging.getLogger()
 
 collection_regex = re.compile("^(?P<subscription>.+)[/]groups[/](?P<group>.+)[/](?P<entity_id>.+)$")
 ttl_regex = re.compile("^(?P<subscription>.+)[/]settings[/]schemas[/](?P<group>.+)$")
@@ -52,6 +55,9 @@ async def dispatch(request: Request):
     collection = payload.value.name.replace(docs_path, "")
     match = collection_regex.match(collection)
     if match is not None:
+        changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
+        if len(changed_properties) == 0:
+            return
         collection_info = match.groupdict()
         subscription = collection_info["subscription"]
         group = collection_info["group"]
@@ -68,13 +74,10 @@ async def dispatch(request: Request):
                 "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
                 "entity_id": entity_id,
                 "state": map_value_to_plain_dict(payload.value),
-                "changed_properties": [el for el in list(payload.update_mask.field_paths) if el != "_last_update"],
+                "changed_properties": changed_properties,
             }
         )
 
-import logging
-
-logger = logging.getLogger()
 
 @router.post("/ttl")
 async def set_ttl(request: Request):
