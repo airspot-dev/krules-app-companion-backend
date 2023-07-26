@@ -36,3 +36,14 @@ spec:
             secretKeyRef:
               key: '1'
               name: ingestion-api-key
+        volumeMounts:
+        - name: firebase-auth
+          readOnly: true
+          mountPath: /var/secrets/firebase
+      volumes:
+      - name: firebase-auth
+        secret:
+          secretName: firebase-auth
+          items:
+          - key: latest
+            path: firebase-auth
