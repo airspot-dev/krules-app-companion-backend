@@ -6,5 +6,7 @@ RUN cd /app/{{ user_lib }} && test -f requirements.txt && pip3 install -r requir
 {% endfor %}
 
 {% for source in sources %}
-ADD {{ source }} /app/{{ source }}
+ADD {{ source.origin }} {{ source.destination }}
 {% endfor %}
+
+RUN pip install psycopg2-binary celery[redis,sqlalchemy]

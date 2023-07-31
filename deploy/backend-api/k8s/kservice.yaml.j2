@@ -36,3 +36,13 @@ spec:
             secretKeyRef:
               key: '1'
               name: ingestion-api-key
+        - name: CELERY_BROKER
+          valueFrom:
+            secretKeyRef:
+              key: '1'
+              name: celery-broker
+        - name: CELERY_RESULTS_BACKEND
+          valueFrom:
+            secretKeyRef:
+              key: '1'
+              name: celery-results-backend

@@ -10,6 +10,7 @@ ADD {{ source.origin }} {{ source.destination }}
 {% endfor %}
 
 RUN pip install psycopg2-binary celery[redis,sqlalchemy]
+RUN pip install requests
 
 
 RUN pip install ipython

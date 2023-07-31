@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Tuple, List
 
 import google.oauth2.id_token
 import google.auth.transport.requests
@@ -14,6 +15,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import google.auth.exceptions
 import os
+from celery import Celery
 
 router = KRulesAPIRouter(
     prefix="/api/v1",
@@ -21,10 +23,17 @@ router = KRulesAPIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+celery_app = Celery('tasks',
+                    broker=os.environ["CELERY_BROKER"],
+                    result_backend=os.environ["CELERY_RESULTS_BACKEND"]
+                    )
+
 GOOGLE_HTTP_REQUEST = google.auth.transport.requests.Request()
 
 api_key_header = APIKeyHeader(name="api-key", auto_error=False)
 firestore_token_header = APIKeyHeader(name="Authorization", auto_error=False)
+
+
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -37,7 +46,8 @@ async def get_api_key(header: str = Security(api_key_header)):
         )
 
 
-async def check_firebase_user(header: str = Security(firestore_token_header), api_key_header: str = Security(api_key_header)):
+async def check_firebase_user(header: str = Security(firestore_token_header),
+                              api_key_header: str = Security(api_key_header)):
     if api_key_header == os.environ["API_KEY"]:
         return header
     else:
@@ -70,6 +80,22 @@ async def check_firebase_user(header: str = Security(firestore_token_header), ap
 class GroupUpdatePayload(BaseModel):
     data: dict
     entities_filter: Optional[list | None]
+
+
+class ScheduleCallbackPayload(BaseModel):
+    when: Optional[datetime | None]
+    seconds: Optional[int | None]
+    now: Optional[bool | None]
+    url: Optional[str | None]
+    header: Optional[Tuple[str, str] | None]
+    topic: Optional[str | None]
+    channels: Optional[List[str] | None]
+    replace_id: Optional[str | None]
+    message: Optional[str | None]
+
+
+class ScheduleCallbackResponsePayload(BaseModel):
+    task_id: Optional[str | None]
 
 
 @router.delete("/{subscription}/{group}", summary="Delete group")
@@ -119,6 +145,49 @@ async def ingestion_data(subscription, group, entity_id, data: dict, api_key: AP
             "data": data
         }
     )
+
+
+@router.post("/{subscription}/{group}/{entity_id}/schedule")
+async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackPayload,
+                            api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
+    """
+    when: Optional[datetime | None]
+    seconds: Optional[int | None]
+    now: Optional[bool | None]
+    url: Optional[str | None]
+    header: Optional[Tuple[str, str] | None]
+    topic: Optional[str | None]
+    channels: Optional[List[str] | None]
+    replace_id: Optional[str | None]
+    message: Optional[str | None]
+    """
+    tt_sum = sum(p is not None for p in [body.when, body.seconds, body.now])
+    if tt_sum == 0 or tt_sum > 1:
+        raise HTTPException(status_code=400, detail="You must specify only one from when, seconds or now")
+
+    call_kwargs = {}
+
+    if body.when is not None:
+        call_kwargs["eta"] = body.when
+
+    try:
+        result = celery_app.send_task(
+            "tasks.callback",
+            args=(subscription, group, entity_id),
+            kwargs={
+                "url": body.url,
+                "header": body.header,
+                "topic": body.topic,
+                "channels": body.channels,
+                "message": body.message,
+                "replace_id": body.replace_id,
+            },
+            **call_kwargs
+        )
+    except Exception as ex:
+        raise HTTPException(status_code=500, detail=str(ex))
+
+    return ScheduleCallbackResponsePayload(task_id=result.task_id)
 
 
 routers = [router]

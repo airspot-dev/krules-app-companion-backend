@@ -38,20 +38,22 @@ spec:
           value: {{ target }}
         #- name: SUBJECTS_REDIS_URL
         #  value: {{ subjects_redis_url }}
-        - name: SQL_ADDRESS
-          value: sql-auth-proxy
-        - name: SQL_DATABASE
-          value: companion
-        - name: SQL_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: sql-auth-pass
-              key: username
-        - name: SQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: sql-auth-pass
-              key: password
+        #- name: SQL_ADDRESS
+        #  value: sql-auth-proxy
+        #- name: SQL_DATABASE
+        #  value: companion
+        #- name: SQL_USERNAME
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: sql-auth-pass
+        #      key: username
+        #- name: SQL_PASSWORD
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: sql-auth-pass
+        #      key: password
         envFrom:
+        #  - secretRef:
+        #      name: redis-auth
           - secretRef:
-              name: redis-auth
+              name: celery-config
