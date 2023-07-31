@@ -36,6 +36,7 @@ spec:
             secretKeyRef:
               key: '1'
               name: ingestion-api-key
+<<<<<<< HEAD
         - name: CELERY_BROKER
           valueFrom:
             secretKeyRef:
@@ -46,3 +47,16 @@ spec:
             secretKeyRef:
               key: '1'
               name: celery-results-backend
+=======
+        volumeMounts:
+        - name: firebase-auth
+          readOnly: true
+          mountPath: /var/secrets/firebase
+      volumes:
+      - name: firebase-auth
+        secret:
+          secretName: firebase-auth
+          items:
+          - key: latest
+            path: firebase-auth
+>>>>>>> 9b1636893807ca093f6e4386c602e1e1b3a1de84

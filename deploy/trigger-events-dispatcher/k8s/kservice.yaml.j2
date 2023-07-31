@@ -16,35 +16,11 @@ spec:
       containers:
       - name: {{ app_name }}
         image: {{ app_name }}
-        # ports:
-        # - containerPort: 8080
         env:
-        {% if target == "dev" %}
-        - name: PUBLISH_PROCEVENTS_LEVEL
-          value: "2"
-        - name: PUBLISH_PROCEVENTS_MATCHING
-          value: "got_errors=true"
-        {% else %}
-        - name: PUBLISH_PROCEVENTS_LEVEL
-          value: "0"
-        {% endif %}
         - name: PROJECT_NAME
           value: {{ project_name }}
         - name: TARGET
           value: {{ target }}
-        - name: STATE_CHANGES_TOPIC
-          value: {{ project_name }}-state-changes-{{ target }}
-        # - name: REDIS_HOST
-        #   value: 10.145.144.115
-        # - name: REDIS_PORT
-        #   value: "6379"
-        # - name: REDIS_DB
-        #   value: "0"
-        # - name: REDIS_AUTH
-        #   valueFrom:
-        #     secretKeyRef:
-        #       key: '1'
-        #       name: redis-auth
         - name: PUBSUB_SINK
           value: {{ project_name }}-default-sink-{{ target }}
         - name: PUBSUB_PROCEVENTS_SINK
@@ -53,14 +29,3 @@ spec:
           value: {{ project_name }}-{{ target }}
         - name: REDIS_URL
           value: redis://:804b4198-f01a-4cdd-bb7b-dd4718e78371@10.16.16.3:6379/0
-        volumeMounts:
-        - name: firebase-auth
-          readOnly: true
-          mountPath: /var/secrets/firebase
-      volumes:
-      - name: firebase-auth
-        secret:
-          secretName: firebase-auth
-          items:
-          - key: latest
-            path: firebase-auth

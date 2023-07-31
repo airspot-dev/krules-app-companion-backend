@@ -16,6 +16,14 @@ from pydantic import BaseModel
 import google.auth.exceptions
 import os
 from celery import Celery
+import firebase_admin
+from firebase_admin import credentials, auth
+
+FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
+
+cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+firebase_admin.initialize_app(cred)
+
 
 router = KRulesAPIRouter(
     prefix="/api/v1",
@@ -51,7 +59,7 @@ async def check_firebase_user(header: str = Security(firestore_token_header),
     if api_key_header == os.environ["API_KEY"]:
         return header
     else:
-        if not firestore_token_header:
+        if not header:
             raise HTTPException(
                 status_code=HTTP_403_FORBIDDEN, detail="Authorization header missing"
             )
@@ -96,6 +104,40 @@ class ScheduleCallbackPayload(BaseModel):
 
 class ScheduleCallbackResponsePayload(BaseModel):
     task_id: Optional[str | None]
+
+class ActiveSubscriptionPayload(BaseModel):
+    active_subscription: int
+
+
+@router.get("/user/subscriptions", summary="Get user subscriptions")
+async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
+
+    if token is None:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
+        )
+    user_data = dict(token)
+    user = auth.get_user(user_data["user_id"])
+    user.custom_claims.get("subscriptions")
+    return {
+        "active_subscription": user.custom_claims.get("active_subscription"),
+        "subscriptions": user.custom_claims.get("subscriptions")
+    }
+
+
+@router.post("/user/subscriptions/activate", summary="Set active subscription")
+async def get_user_subscriptions(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
+
+    if token is None:
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
+        )
+
+    user_data = dict(token)
+    user = auth.get_user(user_data["user_id"])
+    user_claims = user.custom_claims.copy()
+    user_claims["active_subscription"] = payload.active_subscription
+    auth.update_user(user_data["user_id"], custom_claims=user_claims)
 
 
 @router.delete("/{subscription}/{group}", summary="Delete group")

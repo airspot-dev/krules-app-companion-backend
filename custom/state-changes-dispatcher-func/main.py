@@ -6,8 +6,10 @@ import uuid
 from datetime import datetime, timezone
 
 import google.auth
+import pydantic
 from cloudevents.pydantic import CloudEvent
 from google.cloud import pubsub_v1
+from pydantic import ValidationError
 
 _, project = google.auth.default()
 
@@ -57,16 +59,16 @@ def route(topic, event_type, subject, payload):
         topic_path = topic
     else:
         topic_path = pubsub_client.topic_path(project, topic)
-
     event = CloudEvent(
         id=str(uuid.uuid4()),
         type=event_type,
         source="state-changes-dispatcher",
         subject=str(subject),
         data=payload,
-        time=datetime.now(timezone.utc)
+        time=datetime.now(timezone.utc),
+        datacontenttype="application/json",
+        dataschema=""
     )
-
     event_obj = event.dict(exclude_unset=True)
     event_obj["data"] = json.dumps(event_obj["data"], cls=_JSONEncoder).encode()
     event_obj["time"] = event_obj["time"].isoformat()
@@ -85,7 +87,7 @@ def index(data, context):
     match = collection_regex.match(collection)
     collection_info = match.groupdict()
     update_mask = data["updateMask"]["fieldPaths"]
-    update_mask.remove("LAST_UPDATE")
+    update_mask.remove("_last_update")
     handle_group(
         subscription=collection_info["subscription"],
         group=collection_info["group"],
@@ -101,6 +103,14 @@ def handle_group(subscription, group, entity_id, value, old_value, update_mask):
     if subscription == "0" and group == "wallbox.chargers":
         json_decode(value, ["ocpp_received", "ocpp_sent"])
         json_decode(old_value, ["ocpp_received", "ocpp_sent"])
+        payload = {
+            "entity_id": entity_id,
+            "group": group,
+            "subscription": int(subscription),
+            "value": value,
+            "old_value": old_value,
+            "update_mask": update_mask
+        }
         route(
             topic="projects/krules-dev-254113/topics/wallbox-chargers-state-changes",
             event_type="entity-state-changed",
