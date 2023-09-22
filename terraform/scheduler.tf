@@ -1,3 +1,4 @@
+
 resource "google_pubsub_topic" "scheduled-events" {
 
   for_each = var.targets
