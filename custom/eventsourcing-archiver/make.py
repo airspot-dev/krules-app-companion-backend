@@ -10,7 +10,9 @@ sane_utils.load_env()
 
 sane_utils.google.make_cloud_deploy_recipes(
     image_base=sane_utils.check_env("RULESET_IMAGE_BASE"),
-    baselibs=[],
+    baselibs=[
+        "models"
+    ],
     sources=[
         "routers.py",
         "env.py"

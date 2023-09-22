@@ -1,6 +1,7 @@
 import os
 import re
 from krules_fastapi_env import KRulesAPIRouter
+from redis_om import NotFoundError
 from starlette.requests import Request
 from google.events.cloud import firestore
 import firebase_admin
@@ -8,11 +9,14 @@ from firebase_admin import firestore as firestore_client
 from datetime import datetime, timezone, timedelta
 from krules_core.providers import subject_factory
 import logging
+import models
 
 logger = logging.getLogger()
 
 collection_regex = re.compile("^(?P<subscription>.+)[/]groups[/](?P<group>.+)[/](?P<entity_id>.+)$")
 ttl_regex = re.compile("^(?P<subscription>.+)[/]settings[/]schemas[/](?P<group>.+)$")
+triggers_regex = re.compile("^(?P<subscription>.+)[/]settings[/]automations[/](?P<trigger>.+)$")
+channels_regex = re.compile("^(?P<subscription>.+)[/]settings[/]channels[/](?P<channel>.+)$")
 
 firebase_admin.initialize_app()
 db = firestore_client.client()
@@ -22,6 +26,10 @@ router = KRulesAPIRouter(
     tags=["eventsourcing-archiver"],
     responses={404: {"description": "Not found"}},
 )
+
+DOCS_PATH = f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/databases/{os.environ.get('FIRESTORE_DATABASE', '(default)')}/documents/"
+
+models.init()
 
 
 def get_value(obj):
@@ -51,8 +59,7 @@ async def dispatch(request: Request):
         return
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
-    docs_path = f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/databases/{os.environ.get('FIRESTORE_DATABASE', '(default)')}/documents/"
-    collection = payload.value.name.replace(docs_path, "")
+    collection = payload.value.name.replace(DOCS_PATH, "")
     match = collection_regex.match(collection)
     if match is not None:
         changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
@@ -83,8 +90,7 @@ async def dispatch(request: Request):
 async def set_ttl(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
-    docs_path = f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/databases/{os.environ.get('FIRESTORE_DATABASE', '(default)')}/documents/"
-    collection = payload.value.name.replace(docs_path, "")
+    collection = payload.value.name.replace(DOCS_PATH, "")
     match = ttl_regex.match(collection)
     logger.info(f"####### MATCH: {match}")
     logger.info(f"####### COLLECTION: {payload.value.name}")
@@ -98,6 +104,36 @@ async def set_ttl(request: Request):
         ttl = settings.get("ttl", None)
         if ttl:
             subject.set("ttl", ttl, muted=True)
+
+
+@router.post("/sync/triggers")
+def sync_triggers_and_channels(request: Request):
+    raw_pb = await request.body()
+    payload = firestore.DocumentEventData.deserialize(raw_pb)
+    collection = payload.value.name.replace(DOCS_PATH, "")
+    match = triggers_regex.match(collection)
+    if match is not None:
+        trigger_info = match.groupdict()
+        subscription = trigger_info["subscription"]
+        trigger_id = trigger_info["trigger"]
+        document_id = f"{subscription}/{trigger_id}"
+        trigger_obj = map_value_to_plain_dict(payload.value)
+        try:
+            trigger = models.Trigger.get(document_id)
+            changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
+            for prop in changed_properties:
+                setattr(trigger, prop, trigger_obj[prop])
+        except NotFoundError:
+            models.Trigger(
+                document_id=document_id,
+                channels=trigger_obj["channels"],
+                entityFields=trigger_obj["entityFields"],
+                event=trigger_obj["event"],
+                groupMatch=trigger_obj["groupMatch"],
+                name=trigger_obj["name"],
+                running=trigger_obj["running"],
+            ).save()
+
 
 
 routers = [router]

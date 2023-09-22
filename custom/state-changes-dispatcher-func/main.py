@@ -112,7 +112,7 @@ def handle_group(subscription, group, entity_id, value, old_value, update_mask):
             "update_mask": update_mask
         }
         route(
-            topic="projects/krules-dev-254113/topics/wallbox-chargers-state-changes",
+            topic=os.environ["URMET_WALLBOX_TOPIC"],
             event_type="entity-state-changed",
             subject=f"entity|{subscription}|{group}|{entity_id}",
             payload={
