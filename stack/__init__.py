@@ -1,5 +1,7 @@
 from krules_dev import sane_utils
+from pulumi_google_native.cloudresourcemanager import v1
 
+import pulumi
 
 project_name = sane_utils.check_env("PROJECT_NAME")
 
@@ -10,5 +12,14 @@ namespace = sane_utils.get_var_for_target("NAMESPACE", target, default=f"{projec
 
 cluster_project_id = sane_utils.get_var_for_target("CLUSTER_PROJECT_ID", target, default=project_id)
 
+gcp_project = v1.get_project(project=project_id)
+gcp_cluster_project = gcp_project
+if project_id != cluster_project_id:
+    gcp_cluster_project = v1.get_project(project=cluster_project_id)
+
+pulumi.export("gcp_project", gcp_project)
+pulumi.export("gcp_cluster_project", gcp_cluster_project)
+
 from .repository import *
 from .serviceaccount import *
+from .kubernetes import *
