@@ -1,36 +1,40 @@
 #!/usr/bin/env python3
-import os
-
-from krules_dev import sane_utils
 
 from sane import sane_run
 
+from krules_dev import sane_utils
+
 sane_utils.load_env()
 
-#import pdb; pdb.set_trace()
+app_name = sane_utils.check_env("APP_NAME")
+project_name = sane_utils.check_env("PROJECT_NAME")
+target, _ = sane_utils.get_targets_info()
 
-def _get_image_base():
-    if "KRULES_REPO_DIR" in os.environ:
-        return sane_utils.get_buildable_image(
-            location=os.path.join(os.environ["KRULES_REPO_DIR"], "images"),
-            dir_name="ruleset-gcp-image-base",
-        )
-    return sane_utils.check_env("RULESET_IMAGE_BASE")
+STACK_NAME = f"{app_name}-{target}"
 
-
-krules_dev.sane_utils.google.google.make_target_deploy_recipe(
-    image_base=_get_image_base,
+sane_utils.make_prepare_build_context_recipes(
+    image_base=sane_utils.check_env("RULESET_IMAGE_BASE"),
     #baselibs=[
     #    "commons",
     #],
-    #extra_target_context_vars={
-    #    "subjects_redis_url": "SUBJECTS_REDIS_URL",
-    #},
     sources=[
         "tasks.py",
         ("ipython_config.py", "/root/.ipython/profile_default/"),
     ],
 )
+
+sane_utils.make_pulumi_stack_recipes(
+    stack_name=STACK_NAME,
+    configs={
+        "gcp:project": sane_utils.get_var_for_target("project_id"),
+        "kubernetes:context": sane_utils.get_var_for_target("kubectl_ctx", default=f"gke_{project_name}-{target}"),
+        "base_stack": f"base-{target}"
+    },
+    up_deps=[
+        ".build/Dockerfile"
+    ]
+)
+
 
 # clean
 sane_utils.make_clean_recipe(
@@ -40,4 +44,4 @@ sane_utils.make_clean_recipe(
     ],
 )
 
-sane_run("deploy")
+sane_run("pulumi_up")

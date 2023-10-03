@@ -3,7 +3,6 @@
 from sane import *
 
 from krules_dev import sane_utils
-from krules_dev.sane_utils import google
 
 sane_utils.load_env()
 
@@ -15,15 +14,24 @@ sane_utils.google.make_enable_apis_recipe(
     ]
 )
 
-sane_utils.google.make_set_gke_context_recipe()
+sane_utils.make_set_gke_context_recipe(
+    fmt="gke_{project_name}-{target}",
+    ns_fmt="{project_name}-{target}",
+)
 
-sane_utils.google.make_init_pulumi_gcs_recipes()
+sane_utils.make_init_pulumi_gcs_recipes()
 
 sane_utils.make_pulumi_stack_recipes(
     stack_name=STACK_NAME,
     configs={
-        "gcp:project": sane_utils.get_var_for_target("project_id")
-    }
+        "gcp:project": sane_utils.get_var_for_target("project_id"),
+        "kubernetes:context": sane_utils.get_kubectl_ctx(
+            fmt="gke_{project_name}-{target}"
+        )
+    },
+    up_deps=[
+        "set_gke_context"
+    ]
 )
 
 sane_utils.make_clean_recipe(
@@ -33,4 +41,4 @@ sane_utils.make_clean_recipe(
 )
 
 
-sane_run()
+sane_run("pulumi_up")

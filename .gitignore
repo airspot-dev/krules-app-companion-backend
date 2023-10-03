@@ -10,3 +10,7 @@ terraform/backend.hcl
 terraform/.terraform.lock.hcl
 terraform/terraform.tfplan
 terraform/terraform.tfvars.json
+**/*/__pycache__/
+**/*/.build/
+.envrc
+
