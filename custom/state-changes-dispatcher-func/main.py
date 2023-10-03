@@ -86,8 +86,9 @@ def index(data, context):
     collection = context.resource.replace(docs_path, "")
     match = collection_regex.match(collection)
     collection_info = match.groupdict()
-    update_mask = data["updateMask"]["fieldPaths"]
-    update_mask.remove("_last_update")
+    update_mask = data.get("updateMask", {}).get("fieldPaths", [])
+    if "_last_update" in update_mask:
+        update_mask.remove("_last_update")
     handle_group(
         subscription=collection_info["subscription"],
         group=collection_info["group"],
@@ -103,14 +104,6 @@ def handle_group(subscription, group, entity_id, value, old_value, update_mask):
     if subscription == "0" and group == "wallbox.chargers":
         json_decode(value, ["ocpp_received", "ocpp_sent"])
         json_decode(old_value, ["ocpp_received", "ocpp_sent"])
-        payload = {
-            "entity_id": entity_id,
-            "group": group,
-            "subscription": int(subscription),
-            "value": value,
-            "old_value": old_value,
-            "update_mask": update_mask
-        }
         route(
             topic=os.environ["URMET_WALLBOX_TOPIC"],
             event_type="entity-state-changed",
@@ -124,3 +117,33 @@ def handle_group(subscription, group, entity_id, value, old_value, update_mask):
                 "update_mask": update_mask
             }
         )
+    elif subscription == "2" and group == "coldchain.items":
+        if "temp" in update_mask:
+            route(
+                topic=os.environ["COLDCHAIN_ITEMS_TOPIC"],
+                event_type="entity-state-changed",
+                subject=f"entity|{subscription}|{group}|{entity_id}",
+                payload={
+                    "entity_id": entity_id,
+                    "group": group,
+                    "subscription": int(subscription),
+                    "value": value,
+                    "old_value": old_value,
+                    "update_mask": update_mask
+                }
+            )
+    elif subscription == "2" and group == "coldchain.locations":
+        route(
+            topic=os.environ["COLDCHAIN_LOCATIONS_TOPIC"],
+            event_type="entity-state-changed",
+            subject=f"entity|{subscription}|{group}|{entity_id}",
+            payload={
+                "entity_id": entity_id,
+                "group": group,
+                "subscription": int(subscription),
+                "value": value,
+                "old_value": old_value,
+                "update_mask": update_mask
+            }
+        )
+
