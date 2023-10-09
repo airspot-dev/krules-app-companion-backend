@@ -6,6 +6,7 @@ from krules_dev import sane_utils
 
 celery_broker = sane_utils.get_google_secret("celery_broker").decode()
 celery_results_backend = sane_utils.get_google_secret("celery_results_backend").decode()
+firebase_auth = sane_utils.get_google_secret("firebase_auth").decode()
 
 project_name = sane_utils.check_env("project_name")
 target, _ = sane_utils.get_targets_info()
@@ -47,4 +48,16 @@ celery_config_secret = Secret(
     }
 )
 
+firebase_auth_secret = Secret(
+    'firebase-auth-secret',
+    metadata={
+        'name': 'firebase-auth'
+    },
+    type="Opaque",
+    string_data={
+        'firebase-auth': firebase_auth
+    }
+)
+
 pulumi.export('celery_config_secret', celery_config_secret.metadata['name'])
+pulumi.export('firebase_auth_secret', firebase_auth_secret.metadata['name'])

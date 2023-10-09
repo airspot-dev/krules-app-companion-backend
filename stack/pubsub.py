@@ -41,5 +41,20 @@ procevents_publisher_iam_member = gcp.pubsub.TopicIAMMember(
     member=gke_sa_default.email.apply(lambda sa_email: f"serviceAccount:{sa_email}")
 )
 
+default_sink_topic = gcp.pubsub.Topic(
+    f'{project_name}-default-sink-{target}',
+    name=f'{project_name}-default-sink-{target}',
+    project=project_id
+)
+
+default_sink_publisher_iam_member = gcp.pubsub.TopicIAMMember(
+    "default-sink-topic-publisher",
+    project=project_id,
+    topic=default_sink_topic.name,
+    role='roles/pubsub.publisher',
+    member=gke_sa_default.email.apply(lambda sa_email: f"serviceAccount:{sa_email}")
+)
+
 pulumi.export('ingestion_topic', ingestion_topic)
 pulumi.export('procevents_topic', procevents_topic)
+pulumi.export('default_sink_topic', default_sink_topic)

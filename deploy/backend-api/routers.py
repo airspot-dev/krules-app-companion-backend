@@ -66,7 +66,7 @@ async def check_firebase_user(header: str = Security(firestore_token_header),
         id_token = header.split(' ').pop()
         try:
             claims = google.oauth2.id_token.verify_firebase_token(
-                id_token, GOOGLE_HTTP_REQUEST, audience=os.environ.get('GOOGLE_CLOUD_PROJECT')
+                id_token, GOOGLE_HTTP_REQUEST, audience=os.environ.get('FIRESTORE_PROJECT_ID')
             )
         except google.auth.exceptions.InvalidValue as ex:
             raise HTTPException(

@@ -14,13 +14,8 @@ STACK_NAME = f"{app_name}-{target}"
 
 sane_utils.make_prepare_build_context_recipes(
     image_base=sane_utils.check_env("RULESET_IMAGE_BASE"),
-    baselibs=[
-        "firestore",
-        "common",
-    ],
     sources=[
         "routers.py",
-        "ruleset.py",
     ],
 )
 

@@ -66,8 +66,8 @@ backend_api_service = gcp.cloudrunv2.Service(
                         value=target
                     ),
                     ServiceTemplateContainerEnv(
-                        name="GOOGLE_CLOUD_PROJECT",
-                        value=project_id
+                        name="FIRESTORE_PROJECT_ID",
+                        value=sane_utils.get_var_for_target("FIRESTORE_PROJECT_ID", default=project_id)
                     ),
                     ServiceTemplateContainerEnv(
                         name="API_KEY",

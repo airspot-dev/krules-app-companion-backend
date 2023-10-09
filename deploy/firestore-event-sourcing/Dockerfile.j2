@@ -1,13 +1,10 @@
 FROM {{ image_base }}
-
+RUN pip install --upgrade google-events firebase-admin==6.1.0
 {% for user_lib in user_baselibs %}
 ADD .user-baselibs/{{ user_lib }} /app/{{ user_lib }}
 RUN cd /app/{{ user_lib }} && test -f requirements.txt && pip3 install -r requirements.txt || echo "no reqs for {{ user_lib }}"
 {% endfor %}
 
-RUN pip install google-auth==2.17.2
-
 {% for source in sources %}
 ADD {{ source.origin }} {{ source.destination }}
 {% endfor %}
-
