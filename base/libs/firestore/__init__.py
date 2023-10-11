@@ -4,11 +4,13 @@ from krules_core.base_functions import ProcessingFunction
 from datetime import datetime, timezone
 
 from common.event_types import IngestionEventsV1
+import os
 
-FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
+# FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
 
-cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-firebase_admin.initialize_app(cred)
+# cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+# firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app()
 
 
 def get_readable_name(name):
@@ -30,11 +32,15 @@ def delete_collection(coll_ref, batch_size=10):
         return delete_collection(coll_ref, batch_size)
 
 
+def _get_db():
+    return firestore.Client(project=os.environ["FIRESTORE_PROJECT_ID"], database=os.environ["FIRESTORE_DATABASE"])
+
+
 class WriteDocument(ProcessingFunction):
 
     def execute(self, collection, data, document=None, subject_dest=None, track_last_update=False):
 
-        db = firestore.client()
+        db = _get_db()
         if track_last_update:
             data["_last_update"] = datetime.now(timezone.utc)
         if document is not None:
@@ -52,7 +58,7 @@ class WriteDocument(ProcessingFunction):
 class WriteGroupColumns(ProcessingFunction):
 
     def execute(self, subscription, group, columns):
-        db = firestore.client()
+        db = _get_db()
         group_doc_ref = db.collection(f"{subscription}/settings/schemas").document(group)
         if not group_doc_ref.get().exists:
             group_doc_ref.set(
@@ -74,7 +80,7 @@ class WriteGroupColumns(ProcessingFunction):
 class UpdateDocument(ProcessingFunction):
 
     def execute(self, collection: str, document: str, data: dict):
-        db = firestore.client()
+        db = _get_db()
         doc_ref = db.collection(collection).document(document)
         doc_ref.update(data)
 
@@ -83,7 +89,7 @@ class RouteSubjectPropertiesData(ProcessingFunction):
 
     def execute(self, subscription, group, data, entities_filter=None):
 
-        db = firestore.client()
+        db = _get_db()
         if isinstance(entities_filter, str):
             entities_filter = eval(entities_filter)
         if entities_filter is not None and len(entities_filter) > 0:
@@ -106,7 +112,7 @@ class DeleteDocument(ProcessingFunction):
 
     def execute(self, collection, document):
 
-        db = firestore.client()
+        db = _get_db()
         doc = db.collection(collection).document(document)
         for col in doc.collections():
             delete_collection(col)
@@ -117,5 +123,5 @@ class DeleteCollection(ProcessingFunction):
 
     def execute(self, collection):
 
-        db = firestore.client()
+        db = _get_db()
         delete_collection(db.collection(collection))

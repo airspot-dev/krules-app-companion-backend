@@ -1,4 +1,4 @@
-from . import gke_sa_default, vpcaccess_connector_project_id
+from . import gke_sa_default, vpcaccess_connector_project_id, gcp_project
 import pulumi
 import pulumi_gcp as gcp
 
@@ -42,7 +42,8 @@ import pulumi_gcp as gcp
 
 vpcaccess_connector_user_iam_member = gcp.projects.IAMMember(
     'vpcaccess_connector_user_iam_member',
-    member=gke_sa_default.email.apply(lambda email: f"serviceAccount:{email}"),
+    member=f"serviceAccount:{gcp_project.project_number}-compute@developer.gserviceaccount.com",
+    # member=gke_sa_default.email.apply(lambda email: f"serviceAccount:{email}"),
     project=vpcaccess_connector_project_id,
     role="roles/vpcaccess.user"
     # role="roles/compute.networkUser"

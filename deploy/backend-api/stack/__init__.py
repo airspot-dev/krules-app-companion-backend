@@ -15,17 +15,17 @@ project_name = sane_utils.check_env("project_name")
 target, _ = sane_utils.get_targets_info()
 region = sane_utils.get_var_for_target("region")
 project_id = sane_utils.get_var_for_target("project_id")
+firestore_project_id = sane_utils.get_var_for_target("FIRESTORE_PROJECT_ID", default=project_id)
 
-vpcaccess_connector_project_id = sane_utils.get_var_for_target("VPCACCESS_CONNECTOR_PROJECT_ID")
+vpcaccess_connector_project_id = sane_utils.get_var_for_target("VPCACCESS_CONNECTOR_PROJECT_ID", default=project_id)
 vpcaccess_connector_location = sane_utils.get_var_for_target("VPCACCESS_CONNECTOR_LOCATION")
 vpcaccess_connector_name = sane_utils.get_var_for_target("VPCACCESS_CONNECTOR_NAME")
-
 
 image = DockerImageBuilder(
     f"{app_name}-image",
     image_name=base_stack_ref.get_output('docker_repository').apply(
-        lambda
-            repository: f"{repository['location']}-docker.pkg.dev/{repository['project']}/{repository['repository_id']}/{app_name}"
+        lambda repository:
+            f"{repository['location']}-docker.pkg.dev/{repository['project']}/{repository['repository_id']}/{app_name}"
     ),
 ).build()
 
@@ -34,12 +34,18 @@ pulumi.export("image", image)
 backend_api_service = gcp.cloudrunv2.Service(
     f"{project_name}-{app_name}-{target}",
     ingress="INGRESS_TRAFFIC_ALL",
+    project=project_id,
     location=region,
     template=gcp.cloudrunv2.ServiceTemplateArgs(
-        service_account=base_stack_ref.get_output("gke_sa_default").apply(lambda sa: sa["email"]),
         containers=[
             gcp.cloudrunv2.ServiceTemplateContainerArgs(
-                image=image.repo_digest,
+                image=image.repo_digest.apply(
+                    lambda digest:
+                        base_stack_ref.get_output('docker_repository').apply(
+                            lambda repository:
+                                f"{repository['location']}-docker.pkg.dev/{repository['project']}/{repository['repository_id']}/{app_name}@{digest.split('@')[1]}"
+                        )
+                ),
                 envs=[
                     ServiceTemplateContainerEnv(
                         name="PUBLISH_PROCEVENTS_LEVEL",
@@ -67,7 +73,7 @@ backend_api_service = gcp.cloudrunv2.Service(
                     ),
                     ServiceTemplateContainerEnv(
                         name="FIRESTORE_PROJECT_ID",
-                        value=sane_utils.get_var_for_target("FIRESTORE_PROJECT_ID", default=project_id)
+                        value=firestore_project_id
                     ),
                     ServiceTemplateContainerEnv(
                         name="API_KEY",
@@ -97,41 +103,12 @@ backend_api_service = gcp.cloudrunv2.Service(
                         ),
                     )
                 ],
-                volume_mounts=[
-                    gcp.cloudrunv2.ServiceTemplateContainerVolumeMountArgs(
-                        mount_path="/var/secrets/firebase",
-                        name="firebase-auth"
-                    )
-                ]
             )],
-        volumes=[
-            gcp.cloudrunv2.ServiceTemplateVolumeArgs(
-                name="firebase-auth",
-                secret=gcp.cloudrunv2.ServiceTemplateVolumeSecretArgs(
-                    secret=f"{project_name}-firebase_auth-{target}",
-                    items=[
-                        gcp.cloudrunv2.ServiceTemplateVolumeSecretItemArgs(
-                            path="firebase-auth",
-                            version="latest"
-                        )
-                    ]
-                )
-            ),
-        ],
         vpc_access=gcp.cloudrunv2.ServiceTemplateVpcAccessArgs(
             connector=f'projects/{vpcaccess_connector_project_id}/locations/{vpcaccess_connector_location}/connectors/{vpcaccess_connector_name}',
             egress="ALL_TRAFFIC",
         )
     )
 )
-
-# service_account_user_iam_binding = gcp.cloudrunv2.ServiceIamBinding(
-#     "service_account_user_iam_binding",
-#     project=project_id,
-#     location=region,
-#     role="roles/iam.serviceAccountUser",
-#     members=[f"serviceAccount:{base_stack_ref.get_output('gke_sa_default').apply(lambda sa: sa['email'])}"]
-# )
-
 
 pulumi.export("backend_api_service", backend_api_service)

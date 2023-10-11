@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional, Tuple, List
 
+import firebase_admin
 import google.oauth2.id_token
 import google.auth.transport.requests
 from fastapi.openapi.models import APIKey
@@ -16,14 +17,10 @@ from pydantic import BaseModel
 import google.auth.exceptions
 import os
 from celery import Celery
-import firebase_admin
-from firebase_admin import credentials, auth
+from firebase_admin import auth
 
-FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
 
-cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-firebase_admin.initialize_app(cred)
-
+firebase_admin.initialize_app()
 
 router = KRulesAPIRouter(
     prefix="/api/v1",
@@ -104,6 +101,7 @@ class ScheduleCallbackPayload(BaseModel):
 
 class ScheduleCallbackResponsePayload(BaseModel):
     task_id: Optional[str | None]
+
 
 class ActiveSubscriptionPayload(BaseModel):
     active_subscription: int

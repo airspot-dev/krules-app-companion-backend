@@ -10,7 +10,12 @@ STACK_NAME = f"base-{sane_utils.get_targets_info()[0]}"
 
 sane_utils.google.make_enable_apis_recipe(
     google_apis=[
+        "compute",
         "artifactregistry",
+        "secretmanager",
+        "pubsub",
+        "run",
+        "firestore"
     ]
 )
 

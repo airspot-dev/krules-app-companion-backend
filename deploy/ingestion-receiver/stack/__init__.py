@@ -16,6 +16,8 @@ app_name = sane_utils.check_env("app_name")
 target, _ = sane_utils.get_targets_info()
 project_name = sane_utils.check_env("project_name")
 project_id = sane_utils.get_var_for_target('PROJECT_ID', target, True)
+firestore_project_id = sane_utils.get_var_for_target('FIRESTORE_PROJECT_ID', target, default=project_id)
+firestore_db_name = sane_utils.get_var_for_target('FIRESTORE_DB_NAME', target, default=f"{project_name}-{target}")
 
 image = DockerImageBuilder(
     f"{app_name}-image",
@@ -30,6 +32,7 @@ pulumi.export("image", image)
 pull_subscription = gcp.pubsub.Subscription(
     f"{project_name}-{app_name}-{target}",
     topic=base_stack_ref.get_output("ingestion_topic").apply(lambda topic: topic["name"]),
+    project=project_id,
     labels={
         "app_name": app_name,
         "project_name": project_name,
@@ -37,12 +40,14 @@ pull_subscription = gcp.pubsub.Subscription(
     },
     message_retention_duration="600s",
     retain_acked_messages=False,
-    ack_deadline_seconds=20,
+    ack_deadline_seconds=10,
     retry_policy=gcp.pubsub.SubscriptionRetryPolicyArgs(
         minimum_backoff="10s",
     ),
     enable_message_ordering=False
 )
+
+pulumi.export("pull_subscription", pull_subscription)
 
 pull_subscription_subscriber_iam_member = gcp.pubsub.SubscriptionIAMMember(
     "pull_subscription_subscriber_iam_member",
@@ -97,13 +102,21 @@ deployment = kubernetes.apps.v1.Deployment(
                                 name="APPLICATION_PROJECT_ID",
                                 value=project_id
                             ),
+                            kubernetes.core.v1.EnvVarArgs(
+                                name="FIRESTORE_PROJECT_ID",
+                                value=firestore_project_id
+                            ),
+                            kubernetes.core.v1.EnvVarArgs(
+                                name="FIRESTORE_DATABASE",
+                                value=firestore_db_name
+                            ),
                         ],
-                        volume_mounts=[
-                            kubernetes.core.v1.VolumeMountArgs(
-                                mount_path="/var/secrets/firebase",
-                                name="firebase-auth"
-                            )
-                        ]
+                        # volume_mounts=[
+                        #     kubernetes.core.v1.VolumeMountArgs(
+                        #         mount_path="/var/secrets/firebase",
+                        #         name="firebase-auth"
+                        #     )
+                        # ]
                     ),
                     kubernetes.core.v1.ContainerArgs(
                         image=sane_utils.check_env("PULL_SUBSCRIBER_IMAGE"),
@@ -128,20 +141,20 @@ deployment = kubernetes.apps.v1.Deployment(
                         ]
                     )
                 ],
-                volumes=[
-                    kubernetes.core.v1.VolumeArgs(
-                        name="firebase-auth",
-                        secret=kubernetes.core.v1.SecretVolumeSourceArgs(
-                            secret_name="firebase-auth",
-                            # items=[
-                            #     kubernetes.core.v1.KeyToPathArgs(
-                            #         path="firebase-auth",
-                            #         key="firebase-auth"
-                            #     )
-                            # ]
-                        )
-                    )
-                ]
+                # volumes=[
+                #     kubernetes.core.v1.VolumeArgs(
+                #         name="firebase-auth",
+                #         secret=kubernetes.core.v1.SecretVolumeSourceArgs(
+                #             secret_name="firebase-auth",
+                #             # items=[
+                #             #     kubernetes.core.v1.KeyToPathArgs(
+                #             #         path="firebase-auth",
+                #             #         key="firebase-auth"
+                #             #     )
+                #             # ]
+                #         )
+                #     )
+                # ]
             ),
         ),
     ),
