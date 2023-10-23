@@ -1,7 +1,7 @@
 import os
 import re
 from krules_fastapi_env import KRulesAPIRouter
-from redis_om import NotFoundError
+# from redis_om import NotFoundError
 from starlette.requests import Request
 from google.events.cloud import firestore
 import firebase_admin
@@ -9,7 +9,7 @@ from firebase_admin import firestore as firestore_client
 from datetime import datetime, timezone, timedelta
 from krules_core.providers import subject_factory
 import logging
-import models
+# import models
 
 logger = logging.getLogger()
 
@@ -29,7 +29,7 @@ router = KRulesAPIRouter(
 
 DOCS_PATH = f"projects/{os.environ['GOOGLE_CLOUD_PROJECT']}/databases/{os.environ.get('FIRESTORE_DATABASE', '(default)')}/documents/"
 
-models.init()
+# models.init()
 
 
 def get_value(obj):
@@ -62,7 +62,11 @@ async def dispatch(request: Request):
     collection = payload.value.name.replace(DOCS_PATH, "")
     match = collection_regex.match(collection)
     if match is not None:
-        changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
+        state = map_value_to_plain_dict(payload.value)
+        if "old_value" in payload: # if old_value is not in payload document has just been created
+            changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
+        else:
+            changed_properties = [k for k in state.keys() if not k.startswith("_")]
         if len(changed_properties) == 0:
             return
         collection_info = match.groupdict()
@@ -80,7 +84,7 @@ async def dispatch(request: Request):
                 "datetime": datetime.now(timezone.utc),
                 "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
                 "entity_id": entity_id,
-                "state": map_value_to_plain_dict(payload.value),
+                "state": state,
                 "changed_properties": changed_properties,
             }
         )
@@ -106,33 +110,33 @@ async def set_ttl(request: Request):
             subject.set("ttl", ttl, muted=True)
 
 
-@router.post("/sync/triggers")
-def sync_triggers_and_channels(request: Request):
-    raw_pb = await request.body()
-    payload = firestore.DocumentEventData.deserialize(raw_pb)
-    collection = payload.value.name.replace(DOCS_PATH, "")
-    match = triggers_regex.match(collection)
-    if match is not None:
-        trigger_info = match.groupdict()
-        subscription = trigger_info["subscription"]
-        trigger_id = trigger_info["trigger"]
-        document_id = f"{subscription}/{trigger_id}"
-        trigger_obj = map_value_to_plain_dict(payload.value)
-        try:
-            trigger = models.Trigger.get(document_id)
-            changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
-            for prop in changed_properties:
-                setattr(trigger, prop, trigger_obj[prop])
-        except NotFoundError:
-            models.Trigger(
-                document_id=document_id,
-                channels=trigger_obj["channels"],
-                entityFields=trigger_obj["entityFields"],
-                event=trigger_obj["event"],
-                groupMatch=trigger_obj["groupMatch"],
-                name=trigger_obj["name"],
-                running=trigger_obj["running"],
-            ).save()
+# @router.post("/sync/triggers")
+# async def sync_triggers_and_channels(request: Request):
+#     raw_pb = await request.body()
+#     payload = firestore.DocumentEventData.deserialize(raw_pb)
+#     collection = payload.value.name.replace(DOCS_PATH, "")
+#     match = triggers_regex.match(collection)
+#     if match is not None:
+#         trigger_info = match.groupdict()
+#         subscription = trigger_info["subscription"]
+#         trigger_id = trigger_info["trigger"]
+#         document_id = f"{subscription}/{trigger_id}"
+#         trigger_obj = map_value_to_plain_dict(payload.value)
+#         try:
+#             trigger = models.Trigger.get(document_id)
+#             changed_properties = [el for el in list(payload.update_mask.field_paths) if not el.startswith("_")]
+#             for prop in changed_properties:
+#                 setattr(trigger, prop, trigger_obj[prop])
+#         except NotFoundError:
+#             models.Trigger(
+#                 document_id=document_id,
+#                 channels=trigger_obj["channels"],
+#                 entityFields=trigger_obj["entityFields"],
+#                 event=trigger_obj["event"],
+#                 groupMatch=trigger_obj["groupMatch"],
+#                 name=trigger_obj["name"],
+#                 running=trigger_obj["running"],
+#             ).save()
 
 
 

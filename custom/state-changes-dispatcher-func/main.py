@@ -95,7 +95,7 @@ def index(data, context):
         entity_id=collection_info["entity_id"],
         value=map_value_to_plain_dict(data["value"]),
         old_value=map_value_to_plain_dict(data["oldValue"]),
-        update_mask=update_mask
+        update_mask=update_mask,
     )
 
 
