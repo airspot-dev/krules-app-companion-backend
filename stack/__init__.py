@@ -1,34 +1,45 @@
-from krules_dev import sane_utils
-from pulumi_google_native.cloudresourcemanager import v1
-
 import pulumi
+import pulumi_kubernetes as kubernetes
 
-project_name = sane_utils.check_env("PROJECT_NAME")
+from krules_dev import sane_utils
+from krules_dev.sane_utils.pulumi.components import (
+    PubSubTopic,
+    ArtifactRegistry, SaneDockerImage, FirestoreDB,
+)
 
-target, _ = sane_utils.get_targets_info()
-project_id = sane_utils.get_var_for_target('PROJECT_ID', target, True)
-region = sane_utils.get_var_for_target('REGION', target, True)
-namespace = sane_utils.get_var_for_target("NAMESPACE", target, default=f"{project_name}-{target}")
+topic_ingestion = PubSubTopic("ingestion")
+topic_procevents = PubSubTopic("procevents")
+topic_defaultsink = PubSubTopic("defaultsink")
 
-cluster_project_id = sane_utils.get_var_for_target("CLUSTER_PROJECT_ID", target, default=project_id)
-cluster_region = sane_utils.get_var_for_target("CLUSTER_REGION", target, default=region)
-firestore_project_id = sane_utils.get_var_for_target("FIRESTORE_PROJECT_ID", default=project_id)
-firestore_location = sane_utils.get_var_for_target("FIRESTORE_LOCATION", default=region)
-firestore_db_name = sane_utils.get_var_for_target("FIRESTORE_DB_NAME", default=f"{project_name}-{target}")
+pulumi.export("topics", {
+    "procevents": topic_procevents,
+    "defaultsink": topic_defaultsink,
+    "ingestion": topic_ingestion,
+})
 
-gcp_project = v1.get_project(project=project_id)
-gcp_cluster_project = gcp_project
-if project_id != cluster_project_id:
-    gcp_cluster_project = v1.get_project(project=cluster_project_id)
+docker_registry = ArtifactRegistry(
+    "docker-registry",
+)
+pulumi.export("docker-repository", docker_registry.repository)
 
-vpcaccess_connector_project_id = sane_utils.get_var_for_target("VPCACCESS_CONNECTOR_PROJECT_ID", default=project_id)
+namespace = kubernetes.core.v1.Namespace(
+    "gke-namespace",
+    metadata={
+        "name": sane_utils.get_namespace()
+    }
+)
+pulumi.export("gke-namespace", namespace)
 
-pulumi.export("gcp_project", gcp_project)
-pulumi.export("gcp_cluster_project", gcp_cluster_project)
+ruleset_base_image = SaneDockerImage(
+    "ruleset-base",
+    gcp_repository=docker_registry.repository,
+    context="base/images/ruleset",
+)
 
-from .repository import *
-from .serviceaccount import *
-from .kubernetes import *
-from .vpcaccess import *
-from .pubsub import *
-from .firestore import *
+pulumi.export("ruleset-image-base", ruleset_base_image.image)
+
+firestore = FirestoreDB(
+    "firestore",
+)
+
+pulumi.export("firestore", firestore.db)

@@ -124,7 +124,7 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
 
 
 @router.post("/user/subscriptions/activate", summary="Set active subscription")
-async def get_user_subscriptions(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
+async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
 
     if token is None:
         raise HTTPException(

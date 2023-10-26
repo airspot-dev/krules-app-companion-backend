@@ -6,8 +6,6 @@ from krules_dev import sane_utils
 
 sane_utils.load_env()
 
-STACK_NAME = f"base-{sane_utils.get_targets_info()[0]}"
-
 sane_utils.google.make_enable_apis_recipe(
     google_apis=[
         "compute",
@@ -27,7 +25,7 @@ sane_utils.make_set_gke_context_recipe(
 sane_utils.make_init_pulumi_gcs_recipes()
 
 sane_utils.make_pulumi_stack_recipes(
-    stack_name=STACK_NAME,
+    "base",
     configs={
         "gcp:project": sane_utils.get_var_for_target("project_id"),
         "kubernetes:context": sane_utils.get_kubectl_ctx(

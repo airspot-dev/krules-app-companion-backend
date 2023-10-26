@@ -1,6 +1,9 @@
 import pulumi
 import pulumi_gcp as gcp
 from pulumi import StackReference, Config
+from pulumi_gcp.cloudrunv2 import ServiceTemplateContainerEnvArgs, ServiceTemplateContainerEnvValueSourceArgs, \
+    ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs
+
 from krules_dev import sane_utils
 from krules_dev.sane_utils.pulumi.components import DockerImageBuilder
 from pulumi_gcp.cloudrunv2.outputs import ServiceTemplateContainerEnvValueSourceSecretKeyRef, \
@@ -47,56 +50,56 @@ backend_api_service = gcp.cloudrunv2.Service(
                         )
                 ),
                 envs=[
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="PUBLISH_PROCEVENTS_LEVEL",
                         value=sane_utils.get_var_for_target("PUBLISH_PROCEVENTS_LEVEL", default="0")
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="PUBLISH_PROCEVENTS_MATCHING",
                         value=sane_utils.get_var_for_target("PUBLISH_PROCEVENTS_MATCHING", default="*")
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="PROJECT_NAME",
                         value=project_name
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="PUBSUB_SINK",
                         value=f'{project_name}-ingestion-{target}',
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="PUBSUB_PROCEVENTS_SINK",
                         value=f'{project_name}-procevents-{target}',
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="TARGET",
                         value=target
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="FIRESTORE_PROJECT_ID",
                         value=firestore_project_id
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="API_KEY",
-                        value_source=ServiceTemplateContainerEnvValueSource(
-                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRef(
+                        value_source=ServiceTemplateContainerEnvValueSourceArgs(
+                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
                                 secret=f"{project_name}-ingestion_api_key-{target}",
                                 version="latest"
                             )
                         ),
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="CELERY_BROKER",
-                        value_source=ServiceTemplateContainerEnvValueSource(
-                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRef(
+                        value_source=ServiceTemplateContainerEnvValueSourceArgs(
+                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
                                 secret=f"{project_name}-celery_broker-{target}",
                                 version="latest"
                             )
                         ),
                     ),
-                    ServiceTemplateContainerEnv(
+                    ServiceTemplateContainerEnvArgs(
                         name="CELERY_RESULTS_BACKEND",
-                        value_source=ServiceTemplateContainerEnvValueSource(
-                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRef(
+                        value_source=ServiceTemplateContainerEnvValueSourceArgs(
+                            secret_key_ref=ServiceTemplateContainerEnvValueSourceSecretKeyRefArgs(
                                 secret=f"{project_name}-celery_results_backend-{target}",
                                 version="latest"
                             )
