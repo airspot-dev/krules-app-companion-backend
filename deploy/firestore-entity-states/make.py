@@ -15,8 +15,13 @@ base_outputs = get_stack_outputs("base")
 
 sane_utils.make_prepare_build_context_recipes(
     image_base=base_outputs.get("ruleset-image-base").get("repo_digest"),
+    baselibs=[
+        "firestore",
+        "common",
+    ],
     sources=[
-        "ruleset.py"
+        "routers.py",
+        "ruleset.py",
     ],
 )
 

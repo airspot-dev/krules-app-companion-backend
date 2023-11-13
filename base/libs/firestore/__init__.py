@@ -1,10 +1,12 @@
-from firebase_admin import credentials, firestore
-import firebase_admin
-from krules_core.base_functions import ProcessingFunction
+import os
 from datetime import datetime, timezone
 
+import firebase_admin
+from firebase_admin import firestore
+from krules_core.base_functions.processing import ProcessingFunction
+from krules_core.route.router import DispatchPolicyConst
+
 from common.event_types import IngestionEventsV1
-import os
 
 # FIREBASE_CREDENTIALS_PATH = "/var/secrets/firebase/firebase-auth"
 
@@ -104,7 +106,8 @@ class RouteSubjectPropertiesData(ProcessingFunction):
                 event_type=IngestionEventsV1.ENTITY_DATA,
                 payload={
                     "data": data
-                }
+                },
+                dispatch_policy=DispatchPolicyConst.DIRECT
             )
 
 

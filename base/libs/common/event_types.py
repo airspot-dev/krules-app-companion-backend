@@ -22,3 +22,4 @@ class SystemEventsV1:
     ENTITY_UPDATED = EventType(f"{PREFIX}.entity.v1.updated")
     GROUP_CREATED = EventType(f"{PREFIX}.group.v1.created")
     GROUP_DELETED = EventType(f"{PREFIX}.group.v1.deleted")
+    SCHEMA_UPDATED = EventType(f"{PREFIX}.settings.schema.v1.updated")

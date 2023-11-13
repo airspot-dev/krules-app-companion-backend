@@ -1,11 +1,13 @@
 import os
 
-from krules_core.base_functions import *
+from krules_core.base_functions.processing import *
 from krules_core.models import Rule
 
 import google.cloud.logging
-client = google.cloud.logging.Client()
-logger = client.logger(f"{os.environ['PROJECT_NAME']}-procevents-{os.environ['TARGET']}")
+client = google.cloud.logging.Client(project=os.environ["PROJECT_ID"])
+logger = client.logger(os.environ['LOGGER_NAME'])
+
+from pprint import pprint
 
 
 rulesdata: List[Rule] = [
@@ -21,10 +23,22 @@ rulesdata: List[Rule] = [
                         labels={
                             "krules.dev/app": "procevent-logger-publisher",
                             "krules.dev/project": os.environ["PROJECT_NAME"],
+                            "krules.dev/target": os.environ["TARGET"]
                         }
                     )
                 )
             )
         ]
+    ),
+    Rule(
+        name="pprint",
+        processing=[
+            Process(
+                lambda payload: (
+                    pprint(payload)
+                )
+            )
+        ]
     )
+
 ]

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Optional, Tuple, List
 
@@ -19,6 +20,7 @@ import os
 from celery import Celery
 from firebase_admin import auth
 
+from env import get_secret
 
 firebase_admin.initialize_app()
 
@@ -29,8 +31,8 @@ router = KRulesAPIRouter(
 )
 
 celery_app = Celery('tasks',
-                    broker=os.environ["CELERY_BROKER"],
-                    result_backend=os.environ["CELERY_RESULTS_BACKEND"]
+                    broker=get_secret("CELERY_BROKER"),
+                    result_backend=get_secret("CELERY_RESULTS_BACKEND")
                     )
 
 GOOGLE_HTTP_REQUEST = google.auth.transport.requests.Request()
@@ -38,12 +40,14 @@ GOOGLE_HTTP_REQUEST = google.auth.transport.requests.Request()
 api_key_header = APIKeyHeader(name="api-key", auto_error=False)
 firestore_token_header = APIKeyHeader(name="Authorization", auto_error=False)
 
-
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+INGESTION_TOPIC = os.environ["INGESTION_TOPIC"]
 
 
 async def get_api_key(header: str = Security(api_key_header)):
-    if header == os.environ["API_KEY"]:
+    api_key = get_secret("INGESTION_API_KEY")
+    if header == api_key:
         return header
     else:
         raise HTTPException(
@@ -53,7 +57,9 @@ async def get_api_key(header: str = Security(api_key_header)):
 
 async def check_firebase_user(header: str = Security(firestore_token_header),
                               api_key_header: str = Security(api_key_header)):
-    if api_key_header == os.environ["API_KEY"]:
+    api_key = get_secret("INGESTION_API_KEY")
+
+    if api_key_header == api_key:
         return header
     else:
         if not header:
@@ -109,7 +115,6 @@ class ActiveSubscriptionPayload(BaseModel):
 
 @router.get("/user/subscriptions", summary="Get user subscriptions")
 async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
-
     if token is None:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
@@ -125,7 +130,6 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
 
 @router.post("/user/subscriptions/activate", summary="Set active subscription")
 async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
-
     if token is None:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
@@ -145,7 +149,8 @@ async def delete_group(subscription, group: str, token: APIKey = Depends(check_f
         event_type=IngestionEventsV1.GROUP_DELETE,
         payload={
             "token": token
-        }
+        },
+        topic=INGESTION_TOPIC,
     )
 
 
@@ -156,7 +161,8 @@ async def delete_entity(subscription, group, entity_id: str, token: APIKey = Dep
         event_type=IngestionEventsV1.ENTITY_DELETE,
         payload={
             "token": token
-        }
+        },
+        topic=INGESTION_TOPIC,
     )
 
 
@@ -171,7 +177,8 @@ async def ingestion_data(subscription, group, body: GroupUpdatePayload, api_key:
         payload={
             "data": body.data,
             "entities_filter": body.entities_filter,
-        }
+        },
+        topic=INGESTION_TOPIC,
     )
 
 
@@ -183,7 +190,8 @@ async def ingestion_data(subscription, group, entity_id, data: dict, api_key: AP
         event_type=IngestionEventsV1.ENTITY_DATA,
         payload={
             "data": data
-        }
+        },
+        topic=INGESTION_TOPIC,
     )
 
 

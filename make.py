@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import importlib
 
 from sane import *
 
@@ -26,6 +27,7 @@ sane_utils.make_init_pulumi_gcs_recipes()
 
 sane_utils.make_pulumi_stack_recipes(
     "base",
+    program=lambda: importlib.import_module("base.stack"),
     configs={
         "gcp:project": sane_utils.get_var_for_target("project_id"),
         "kubernetes:context": sane_utils.get_kubectl_ctx(

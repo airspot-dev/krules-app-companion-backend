@@ -31,15 +31,6 @@ topic_procevents = Topic.get(
     )
 )
 
-topic_defaultsink = Topic.get(
-    "defaultsink",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("defaultsink").get("id")
-    )
-)
-
 deployment = GkeDeployment(
     app_name,
     gcp_repository=gcp_repository,
@@ -50,7 +41,6 @@ deployment = GkeDeployment(
     ],
     publish_to={
         "procevents": topic_procevents,
-        "defaultsink": topic_defaultsink,
     },
     # subscribe_to={
     #     "defaultsink": topic_defaultsink,
