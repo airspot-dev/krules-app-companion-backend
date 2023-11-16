@@ -1,0 +1,11 @@
+@import "../../../scss/vars.scss";
+@import "../../../scss/brand.scss";
+@import "../../../scss/utils.scss";
+
+.kr-login-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 350px;
+
+  @include kr-box-default;
+}

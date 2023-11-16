@@ -1,0 +1,22 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+.kr-column-visibility {
+  width: 130px;
+}
+
+.kr-visibility-chip-wrapper {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .kr-visibility-chip {
+    font-size: $kr-text-small;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+}

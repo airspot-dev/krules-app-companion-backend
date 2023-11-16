@@ -1,0 +1,117 @@
+<div class="kr-generic-container" id="kr-table">
+
+  <h2><i class="fa-solid fa-bolt"></i> Triggers</h2>
+
+  <div class="kr-actions-wrapper">
+    <button mat-button [routerLink]="createAutomation()">Create new trigger<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div class="kr-spacer-large"></div>
+
+  <div *ngIf="!automations.length" class="kr-layout-center">
+    <h2>No triggers yet.</h2>
+    <p>Start by creating your first trigger!</p>
+    <div class="kr-spacer-large"></div>
+    <button mat-stroked-button [routerLink]="createAutomation()">Create new trigger<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div *ngIf="automations.length">
+    <div class="kr-table-wrapper">
+      <table mat-table [dataSource]="automations" class="kr-table-draggable-row" cdkDropList (cdkDropListDropped)="drop($event)">
+
+        <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+        <ng-container matColumnDef="drag" sticky>
+          <th mat-header-cell *matHeaderCellDef class="kr-text-left"></th>
+          <td mat-cell *matCellDef="let element" class="kr-grip-column">
+            <i class="fa-solid fa-grip-vertical"></i>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status" sticky>
+          <th mat-header-cell *matHeaderCellDef class="kr-text-center">Status</th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element">
+            <div class="kr-automation-status-wrapper" *ngIf="element.running">
+              <div class="kr-led-wrapper">
+                <div class="kr-led kr-led-on"></div>
+              </div> Active
+            </div>
+            <div class="kr-automation-status-wrapper" *ngIf="!element.running">
+              <div class="kr-led-wrapper">
+                <div class="kr-led kr-led-off"></div>
+              </div> Paused
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name" sticky>
+          <th mat-header-cell class="kr-text-left" *matHeaderCellDef> Name </th>
+          <td mat-cell class="kr-text-medium kr-text-left" *matCellDef="let element"> <b>{{element.name}}</b> </td>
+        </ng-container>
+
+        <ng-container matColumnDef="groupMatch">
+          <th mat-header-cell *matHeaderCellDef> Filter </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element"> {{element.groupMatch}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="event">
+          <th mat-header-cell *matHeaderCellDef> Events </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element"> {{element.event.join(', ')}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="field">
+          <th mat-header-cell *matHeaderCellDef> Fields </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element"> {{element.entityFields.join(', ')}} </td>
+        </ng-container>
+
+        <!-- <ng-container matColumnDef="position">
+      <th mat-header-cell *matHeaderCellDef> Position </th>
+      <td mat-cell class="kr-text-center" *matCellDef="let element">
+        {{element.position}}
+      </td>
+    </ng-container> -->
+
+        <ng-container matColumnDef="channel">
+          <th mat-header-cell *matHeaderCellDef> Channels </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element">
+            <div class="kr-column-channel">
+              <div class="kr-channel-element" *ngFor="let c of element.channelInfos">
+                <img [src]="c.image">
+                {{c.name}}
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions" stickyEnd>
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="togglePause(element)">
+              <mat-icon *ngIf="!element.running">play_arrow</mat-icon>
+              <mat-icon *ngIf="element.running">pause</mat-icon>
+            </button>
+            <!-- <button mat-icon-button (click)="update(element)">
+          <mat-icon>edit</mat-icon>
+        </button> -->
+            <button mat-icon-button [routerLink]="'/automation/update/' + element.id">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="delete(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row cdkDrag *matRowDef="let row; columns: displayedColumns;">
+          <small *cdkDragPreview class="drag-preview">
+            <strong>Group match:</strong> {{row.groupMatch}}
+            <br>
+            <strong>Event:</strong> {{row.event}}
+          </small>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

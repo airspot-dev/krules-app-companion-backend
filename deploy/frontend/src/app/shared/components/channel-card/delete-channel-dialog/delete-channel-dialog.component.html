@@ -1,0 +1,18 @@
+<div class="kr-dialogs-content-wrapper">
+
+  <h3>Deleting <i>{{data.channel.name}}</i></h3>
+  <p *ngIf="!hasAutomations">Are you sure you want to delete this channel?</p>
+  <p *ngIf="hasAutomations">
+    You cannot delete the channel because of the following triggers related to this channel:
+    <br>
+  </p>
+  <p *ngFor="let automation of automations">
+    <i class="fa-solid fa-bolt"></i> {{automation.data().name}}
+  </p>
+
+</div>
+
+<mat-dialog-actions align="end" class="kr-dialogs-btn-wrapper">
+  <button color="warn" [disabled]="disabled" (click)="delete()" cdkFocusInitial mat-raised-button mat-dialog-close>Delete <i>{{data.channel.name}}</i></button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

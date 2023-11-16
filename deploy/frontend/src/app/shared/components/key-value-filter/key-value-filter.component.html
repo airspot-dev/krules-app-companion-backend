@@ -1,0 +1,25 @@
+<h4 class="kr-mb-small">Filter data by adding conditions</h4>
+
+<form>
+  <mat-form-field class="kr-filter-wrapper">
+    <mat-label>Start by typing column ID or display name...</mat-label>
+    <mat-chip-grid #chipGrid aria-label="Filter">
+      <mat-chip-row *ngFor="let ft of filterTokens" (removed)="remove(ft.uid)" [class.kr-chip-operator]="ft.type=='operator'" [class.kr-chip-condition]="ft.type=='column'" class="kr-chip-condition">
+        <!-- Apply kr-chip-operator class to operators only -->
+        {{ft.token}}
+        <button matChipRemove [attr.aria-label]="'remove ' + ft.token">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+    </mat-chip-grid>
+    <input placeholder="" #filterInput [formControl]="filterCtrl" [matChipInputFor]="chipGrid" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event)" />
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+      <mat-option *ngFor="let item of filteredList | async" [value]="item" [class.divider]="item.type==='divider'" [disabled]="item.type==='divider'">
+        <!-- {{item.type}} -->
+        <span *ngIf="item.type !== 'divider'">
+          {{item.id}} (<i>{{item.displayName}}</i>)
+        </span>
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</form>

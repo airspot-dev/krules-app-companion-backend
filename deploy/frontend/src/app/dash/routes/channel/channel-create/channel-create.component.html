@@ -1,0 +1,109 @@
+<div class="kr-generic-container" id="kr-table">
+
+  <h2><i class="fa-solid fa-satellite-dish"></i> Create a new Channel</h2>
+
+  <mat-vertical-stepper [linear]="false" #stepper>
+
+    <!-- STEP 1 -->
+    <mat-step [stepControl]="channelChooseForm">
+      <form [formGroup]="channelChooseForm">
+        <ng-template matStepLabel>Channel Type</ng-template>
+
+        <div class="kr-stepper-channel-chooser">
+          <div class="button" *ngFor="let integration of integrations">
+            <input type="radio" required [id]="integration.code" [value]="integration.code" formControlName="channel" />
+            <label class="btn btn-default" [for]="integration.code">
+              <img [src]="integration.imageNeg" *ngIf="channelChooseForm.controls['channel']?.value === integration.code">
+              <img [src]="integration.image" *ngIf="channelChooseForm.controls['channel']?.value !== integration.code">
+              {{integration.name}}
+            </label>
+          </div>
+        </div>
+
+        <button (click)="buildParamsForm()" [disabled]="isDisabledFirstStep()" mat-stroked-button matStepperNext>Next</button>
+
+      </form>
+    </mat-step>
+
+    <!-- STEP 2 -->
+    <mat-step [stepControl]="channelParamsForm">
+      <form [formGroup]="channelParamsForm">
+        <ng-template matStepLabel>Channel Parameters</ng-template>
+
+        <button mat-button matStepperPrevious class="kr-mt-base">
+          <mat-icon matPrefix>arrow_back</mat-icon> Previous step
+        </button>
+
+        <div class="kr-stepper-params-config">
+
+          <mat-form-field>
+            <mat-label>Display Name</mat-label>
+            <input matInput type="text" formControlName="name" placeholder="Write a display name" required="true">
+          </mat-form-field>
+
+          <div *ngFor="let formItem of choosenIntegration.form">
+
+            <mat-form-field *ngIf="formItem.type==='text'">
+              <mat-label>{{formItem.name}}</mat-label>
+              <input matInput type="text" [formControlName]="formItem.code" [placeholder]="formItem.placeholder" [required]="formItem.required">
+            </mat-form-field>
+            <mat-form-field *ngIf="formItem.type==='url'">
+              <mat-label>{{formItem.name}}</mat-label>
+              <input matInput type="url" [formControlName]="formItem.code" [placeholder]="formItem.placeholder" [required]="formItem.required">
+            </mat-form-field>
+
+            <div *ngIf="formItem.type==='multi-key-value'" class="kr-stepper-params-config-webhook">
+              <table class="example-full-width" cellspacing="0">
+                <tr>
+                  <td>
+                    <b>{{formItem.name}}:</b> {{formItem.counter}}
+                    <div class="kr-spacer-micro"></div>
+                  </td>
+                  <td>
+                    <button mat-button (click)="addKeyValue(formItem.code)">
+                      <mat-icon>add</mat-icon> Add header
+                    </button>
+                    <div class="kr-spacer-micro"></div>
+                  </td>
+                </tr>
+                <tr [formGroupName]="id" *ngFor="let id of getMultiKeyValueArray(formItem.code)">
+                  <td>
+                    <mat-form-field class="example-full-width">
+                      <mat-label>Key</mat-label>
+                      <input matInput type="text" [formControlName]="'key'" [placeholder]="formItem.placeholder_key">
+                    </mat-form-field>
+                  </td>
+                  <td>
+                    <mat-form-field class="example-full-width">
+                      <mat-label>Value</mat-label>
+                      <input matInput type="text" [formControlName]="'value'" [placeholder]="formItem.placeholder_value">
+                    </mat-form-field>
+                  </td>
+                  <td>
+                    <button mat-icon-button (click)="deleteMultiItem(id)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
+          </div>
+          <!-- END FOR -->
+        </div>
+
+        <button *ngIf="!isUpdating" mat-stroked-button [disabled]="disabled()" (click)="createChannel()">
+          <mat-icon matPrefix>add</mat-icon> Create channel
+        </button>
+        <button *ngIf="isUpdating" mat-stroked-button [disabled]="disabled()" (click)="updateChannel()">
+          <mat-icon matPrefix>save</mat-icon> Update channel
+        </button>
+        <button class="kr-ml-base" color="warn" mat-stroked-button routerLink="/channel/list">
+          <mat-icon matPrefix>close</mat-icon> Cancel
+        </button>
+
+      </form>
+    </mat-step>
+
+  </mat-vertical-stepper>
+</div>

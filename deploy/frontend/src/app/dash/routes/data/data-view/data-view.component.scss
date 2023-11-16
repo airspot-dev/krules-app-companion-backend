@@ -1,0 +1,116 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+.kr-data-container {
+
+  $kr-sidebar-btn-size: $kr-space-large;
+  $kr-left-space-collapsed: $kr-sidebar-btn-size + $kr-space-base;
+
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 1fr;
+  gap: 0px $kr-space-medium;
+  grid-auto-flow: row;
+  grid-template-areas: "sidebar table";
+
+  min-height: calc(100vh - 64px - 2rem);
+
+  transition: all 0.25s;
+
+  &.collapsed {
+    grid-template-columns: 0 1fr;
+    gap: 0px $kr-left-space-collapsed;
+
+    .kr-sidebar {
+      scale: 0;
+    }
+  }
+
+  .kr-sidebar {
+    grid-area: sidebar;
+    @include kr-box-default;
+    min-height: calc(100vh - 64px - 4rem);
+    // margin-bottom: $kr-space-base;
+
+    .kr-sidebar-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: $kr-space-medium;
+    }
+
+    .mat-mdc-list-base {
+      min-height: calc(100vh - 64px - 4rem - 120px - 30px - $kr-space-medium);
+      overflow: auto;
+    }
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+    .mdc-list-item {
+      padding-left: 0;
+
+      small {
+        font-family: "Roboto Mono", monospace;
+        color: $kr-grey;
+      }
+    }
+    .mdc-list-item--with-trailing-radio .mdc-list-item__end {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    .mat-tree {
+      height: calc(100vh - 64px - 4rem - 40px - $kr-space-medium);
+      overflow: auto;
+    }
+
+    .kr-faded-view {
+      position: relative;
+      &:after {
+        @include kr-fading-list;
+      }
+    }
+  }
+
+  .kr-table {
+    grid-area: table;
+    @include kr-box-default;
+
+    position: relative;
+
+    .kr-sidebar-btn {
+      position: absolute;
+      left: -$kr-left-space-collapsed;
+      top: 10px;
+      border: none;
+    }
+  }
+
+  .kr-sidebar-btn {
+
+    text-decoration: none;
+    border-radius: 50%;
+    border: 1px solid #e0e0e0; // MIMICS BTNS ON THE RIGHT
+
+    transition: all 0.1s;
+    width: $kr-sidebar-btn-size;
+    height: $kr-sidebar-btn-size;
+    background-color: white;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      @extend .kr-shadow-3;
+    }
+  }
+
+}
+
+.kr-warn-msg {
+  text-align: center;
+}

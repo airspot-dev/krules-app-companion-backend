@@ -1,0 +1,155 @@
+@use "@angular/material" as mat;
+
+$kr-night: #063b79;
+$kr-coolgray: #ced8e4;
+$kr-torquoise: #edf2f7;
+
+$kr-coolgray-dark: darken($kr-coolgray, 17%);
+
+$kr-grey: rgb(160, 160, 160);
+$kr-grey-extra-light: rgb(250, 250, 250);
+
+$kr-blue: #0457b9;
+$kr-yellow: #f9be04;
+
+$kr-success: #52b946;
+$kr-warn: #f08842;
+$kr-danger: #f54a3d;
+
+$kr-yellow-light: lighten($kr-yellow, 40%);
+$kr-warn-light: lighten($kr-warn, 25%);
+$kr-danger-light: lighten($kr-danger, 25%);
+
+/* For use in src/lib/core/theming/_palette.scss */
+$md-krcoolgray: (
+  50: #f9fafc,
+  100: #f0f3f7,
+  200: #e7ecf2,
+  300: #dde4ec,
+  400: #d5dee8,
+  500: #ced8e4,
+  // 500 => #CED8E4 da modificare negli input focus perchè scompare
+  600: #c9d4e1,
+  700: #c2cedd,
+  800: #bcc8d9,
+  900: #b0bfd1,
+  A100: #ffffff,
+  A200: #ffffff,
+  A400: #ffffff,
+  A700: #ffffff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #000000,
+    800: #000000,
+    900: #000000,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$md-krnight: (
+  50: #e1e7ef,
+  100: #b4c4d7,
+  200: #839dbc,
+  300: #5176a1,
+  400: #2b588d,
+  500: #063b79,
+  600: #053571,
+  700: #042d66,
+  800: #03265c,
+  900: #021949,
+  A100: #7d9bff,
+  A200: #4a73ff,
+  A400: #174cff,
+  A700: #003afc,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #ffffff,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #ffffff,
+    A400: #ffffff,
+    A700: #ffffff,
+  ),
+);
+
+$md-kryellow: (
+  50: #fef7e1,
+  100: #fdecb4,
+  200: #fcdf82,
+  300: #fbd24f,
+  400: #fac82a,
+  500: #f9be04,
+  600: #f8b803,
+  700: #f7af03,
+  800: #f6a702,
+  900: #f59901,
+  A100: #ffffff,
+  A200: #fff5e8,
+  A400: #ffe0b5,
+  A700: #ffd59c,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #000000,
+    600: #000000,
+    700: #000000,
+    800: #000000,
+    900: #000000,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
+
+$md-krblu: (
+  50: #e1ebf7,
+  100: #b4cdea,
+  200: #82abdc,
+  300: #4f89ce,
+  400: #2a70c4,
+  500: #0457b9,
+  600: #034fb2,
+  700: #0346aa,
+  800: #023ca2,
+  900: #012c93,
+  A100: #beccff,
+  A200: #8ba4ff,
+  A400: #587cff,
+  A700: #3f68ff,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #ffffff,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #ffffff,
+  ),
+);

@@ -19,16 +19,17 @@ if __name__ == '__main__':
 import firebase_admin
 from firebase_admin import credentials, auth
 
-cred = credentials.Certificate("firebasesa.json")
-firebase_admin.initialize_app(cred)
-uid = "2LCpItDP54QAypGRW8dTatAFlmB3"
+#cred = credentials.Certificate("firebasesa.json")
+#firebase_admin.initialize_app(cred)
+firebase_admin.initialize_app()
+uid = "clOKBxMPv2Tm1OYTTBxneY4A8f42"
 # user = auth.get_user(uid)
 auth.set_custom_user_claims(
     uid,
     {
-        'subscription_id': 0,
-        'active_subscription': 0,
-        'subscriptions': [0, 1, 2]
+        'subscription_id': 1,
+        'active_subscription': 1,
+        'subscriptions': [1, 2]
     }
 )
 uid_2 = "Gn9VoK6O77dSsulWwblOQ6t8WO53"

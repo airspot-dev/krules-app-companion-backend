@@ -1,0 +1,80 @@
+<div class="kr-generic-container" id="kr-table">
+
+  <h2><i class="fa-solid fa-key"></i> API Keys</h2>
+
+  <div class="kr-actions-wrapper">
+    <button mat-button (click)="openGuideDialog()">
+      <i class="fa-regular fa-circle-question"></i>
+      How to use API Key
+    </button>
+    <button mat-button routerLink="/setting/token/create">Create new API Key<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div class="kr-spacer-large"></div>
+
+  <div *ngIf="!keys.length" class="kr-layout-center">
+    <h2>No API Key yet.</h2>
+    <p>Start by creating your first API Key!</p>
+    <div class="kr-spacer-large"></div>
+    <button mat-stroked-button routerLink="/setting/token/create">Create new API Key<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div *ngIf="keys.length">
+    <div class="kr-table-wrapper">
+      <table mat-table [dataSource]="keys" class="kr-api-table">
+        <ng-container matColumnDef="name" sticky>
+          <th mat-header-cell class="kr-text-left" *matHeaderCellDef> Name </th>
+          <td mat-cell class="kr-text-left" *matCellDef="let element">
+            <div class="kr-api-table-centered-content">
+              <b>{{element.data().name}}</b>
+              <mat-icon class="kr-ml-micro" [matTooltip]="element.data().note">info</mat-icon>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef> Created At </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element">
+            {{ getDate(element.data().createdAt)|date:'dd/MM/YYYY – HH:mm' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="expireAt">
+          <th mat-header-cell *matHeaderCellDef> Expire At </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element"> {{getDate(element.data().expireAt)|date:'dd/MM/YYYY – HH:mm'}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="key">
+          <th mat-header-cell *matHeaderCellDef> Key </th>
+          <td mat-cell class="kr-text-center" *matCellDef="let element">
+            <div class="kr-api-table-centered-content" style="justify-content: center;">
+              <span *ngIf="element.hidden">{{displayText(element.hidden, element.data().key)}}</span>
+              <app-button-cliboard *ngIf="!element.hidden" [buttonText]="element.data().key" [text]="element.data().key"></app-button-cliboard>
+              <button mat-icon-button (click)="element.hidden = !element.hidden" class="kr-ml-small">
+                <mat-icon matPrefix>
+                  {{ element.hidden ? 'visibility_off': 'visibility'}}
+                </mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions" stickyEnd>
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button [routerLink]="'/setting/token/edit/' + element.id">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="delete(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

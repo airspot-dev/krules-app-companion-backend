@@ -1,0 +1,11 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+
+.kr-api-table {
+  .kr-api-table-centered-content {
+    display: flex;
+    align-items: center;
+  }
+}

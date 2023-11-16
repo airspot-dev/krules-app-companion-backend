@@ -1,0 +1,50 @@
+<div fxLayout="column">
+  <h2>Table Layout</h2>
+  <h4>Sort columns with drag&drop</h4>
+</div>
+<div fxLayout="row">
+  <mat-card class="data-layout-card" *ngFor="let column of columns">
+    <mat-card-content>
+      <h3>title</h3>
+      <mat-form-field appearance="fill">
+        <mat-label>
+          Custom title
+        </mat-label>
+        <input matInput placeholder="temperature..." name="customTitle">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>
+          Define data type
+        </mat-label>
+        <mat-select readonly>
+          <mat-option value="onChange">Number</mat-option>
+          <mat-option value="onChange">Date</mat-option>
+          <mat-option value="onChange">Position</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-icon-button>
+        <mat-icon>visibility</mat-icon>
+      </button>
+      <button mat-icon-button>
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  <app-dash-button [title]="'Add Column'"></app-dash-button>
+</div>
+
+<hr style="margin-top: 40px">
+<div fxLayout="column">
+  <h2>Data formatting</h2>
+  <h4>Choose your rapresentation rule and apply your custom styles</h4>
+</div>
+
+<div fxLayout="row">
+  <app-dash-button class="data-layout-card" appMaterialElevation [title]="'Highlight Value'"></app-dash-button>
+  <app-dash-button class="data-layout-card" appMaterialElevation [title]="'Apply Gradient'"></app-dash-button>
+  <app-dash-button class="data-layout-card" appMaterialElevation [title]="'Add Tag'"></app-dash-button>
+</div>
+
+<app-layout-rule-list></app-layout-rule-list>

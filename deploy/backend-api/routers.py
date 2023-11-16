@@ -119,13 +119,22 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
         )
-    user_data = dict(token)
-    user = auth.get_user(user_data["user_id"])
-    user.custom_claims.get("subscriptions")
+    # user_data = dict(token)
+    # print(">>>>>>>>>>>>> user_data: ", str(user_data))
+    # user = auth.get_user(user_data["user_id"])
+    # print(">>>>>>>>>>>>> user: ", str(user))
+    # active_subscription = user.custom_claims.get("active_subscription")
+    # print(">>>>>>>>>>>>> active_subscription", str(active_subscription))
+    # subscriptions = user.custom_claims.get("subscriptions")
+    # print(">>>>>>>>>>>>> subscriptions", str(subscriptions))
     return {
-        "active_subscription": user.custom_claims.get("active_subscription"),
-        "subscriptions": user.custom_claims.get("subscriptions")
+        "active_subscription": 1,
+        "subscriptions": [1]
     }
+    # return {
+    #     "active_subscription": active_subscription,
+    #     "subscriptions": subscriptions
+    # }
 
 
 @router.post("/user/subscriptions/activate", summary="Set active subscription")

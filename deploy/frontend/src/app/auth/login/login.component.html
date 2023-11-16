@@ -1,0 +1,19 @@
+<div class="kr-layout-center">
+
+  <form [formGroup]="loginForm" (ngSubmit)="submit()">
+    <div class="kr-login-wrapper">
+
+    <h2 class="kr-text-center kr-mb-base">Sign In to KRules Companion</h2>
+
+    <mat-form-field>
+      <input matInput placeholder="Email" formControlName="email">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput type="password" placeholder="Password" formControlName="password">
+    </mat-form-field>
+    <button mat-raised-button type="submit" color="accent">Sign In</button>
+
+    </div>
+  </form>
+
+</div>

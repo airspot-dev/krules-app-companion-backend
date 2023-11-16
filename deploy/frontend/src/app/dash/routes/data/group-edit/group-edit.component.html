@@ -1,0 +1,108 @@
+<div class="kr-generic-container">
+
+  <app-data-back-button [group]="groupId!"></app-data-back-button>
+
+  <h2><i class="fa-solid fa-shapes"></i> Group editing for <i>{{groupId}}</i></h2>
+  <p>
+    <!-- Edit column <i>Display Title</i>, configure the columns you want to show up in the data table and in each <i>Event Sourcing</i> table.<br>
+    Sort column order by dragging. -->
+    Set the columns you want to show up in the data table and in the <i>Event Sourcing</i> table.<br>
+    Sort columns by dragging.
+  </p>
+
+  <div class="kr-spacer-large"></div>
+
+  <table mat-table [dataSource]="columns" class="kr-table-draggable-row" cdkDropList (cdkDropListDropped)="drop($event)">
+
+    <ng-container matColumnDef="drag">
+      <th style="width: 1%;" mat-header-cell *matHeaderCellDef class="kr-text-left"></th>
+      <td mat-cell *matCellDef="let element" class="kr-grip-column">
+        <i class="fa-solid fa-grip-vertical"></i>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="visibility">
+      <th style="width: 1%;" mat-header-cell *matHeaderCellDef class="kr-column-visibility"> Visibility </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-medium">
+        <div class="kr-visibility-chip-wrapper">
+          <span *ngIf="!isHidden('hide_data', element)" class="kr-visibility-chip kr-background-night">Visible</span>
+          <span *ngIf="isHidden('hide_data', element)" class="kr-visibility-chip kr-background-warn">Hidden</span>
+        </div>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="name">
+      <th style="width: 1%;" mat-header-cell *matHeaderCellDef class="kr-text-left"> Display name </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-medium">
+        {{element.data.readable_name}}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="columnId">
+      <th mat-header-cell *matHeaderCellDef> Column ID </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-medium kr-text-center">
+        <i>{{element.id}}</i>
+      </td>
+    </ng-container>
+
+    <!-- <ng-container matColumnDef="position">
+      <th mat-header-cell *matHeaderCellDef style="text-align: left;"> Position </th>
+      <td mat-cell *matCellDef="let element" class="kr-grip-column">
+        {{element.data.userPreferences[userId].position}}
+      </td>
+    </ng-container> -->
+    <!-- <ng-container matColumnDef="visibility">
+      <th mat-header-cell *matHeaderCellDef> Visibility </th>
+      <td mat-cell class="kr-text-center" *matCellDef="let element">
+
+      </td>
+    </ng-container> -->
+
+    <!-- <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>
+        <div>Display Title</div>
+        <small>Choose a custom name and save</small>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-form-field appearance="fill">
+          <input [(ngModel)]="element.data.readable_name" matInput type="text">
+          <button mat-icon-button matSuffix (click)="saveName(element)">
+            <mat-icon>save</mat-icon>
+          </button>
+        </mat-form-field>
+      </td>
+    </ng-container> -->
+
+    <ng-container matColumnDef="data">
+      <th mat-header-cell *matHeaderCellDef class="kr-text-right">
+        Set column visibility
+      </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-right">
+        <button mat-icon-button (click)="toggleItem('hide_data', element)">
+          <mat-icon>
+            {{ isHidden('hide_data', element) ? 'visibility_off': 'visibility'}}
+          </mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <!--  <ng-container matColumnDef="event_sourcing">
+      <th mat-header-cell *matHeaderCellDef class="kr-text-center">
+        Event Sourcing
+      </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-center">
+
+        <button mat-icon-button (click)="toggleItem('hide_event_sourcing', element)">
+          <mat-icon>
+            {{ element.data['hide_event_sourcing'] ? 'visibility_off': 'visibility'}}
+          </mat-icon>
+        </button>
+      </td>
+    </ng-container> -->
+
+
+
+    <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
+    <tr mat-row cdkDrag *matRowDef="let row; columns: columnIds;">
+      <small *cdkDragPreview class="drag-preview">
+        <strong>Column ID:</strong> {{row.id}}
+      </small>
+    </tr>
+  </table>
+</div>

@@ -33,12 +33,27 @@ topic_ingestion = gcp.pubsub.Topic.get(
     )
 )
 
+access_secrets = []
+envs = []
+
+subjects_redis_url = sane_utils.get_var_for_target("subjects_redis_url", default=None)
+if subjects_redis_url is not None:
+    envs.append(
+        EnvVarArgs(
+            name="SUBJECTS_REDIS_URL",
+            value=subjects_redis_url,
+        ),
+    )
+else:
+    access_secrets.append("subjects_redis_url")
+
 deployment = GkeDeployment(
     app_name,
     gcp_repository=gcp_repository,
-    access_secrets=[
-        "subjects_redis_url",
-    ],
+    access_secrets=access_secrets,
+    app_container_kwargs=dict(
+        env=envs
+    ),
     subscribe_to=[
         (
             "ingestion",
@@ -54,6 +69,7 @@ deployment = GkeDeployment(
     },
     use_firestore=True,
 )
+pulumi.export("deployment", deployment)
 
 
 

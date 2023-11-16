@@ -1,0 +1,51 @@
+<div class="kr-generic-container" id="kr-table">
+
+
+  <h2><i class="fa-solid fa-bolt"></i> Event sourcing for entity <i>{{id}}</i></h2>
+
+  <div class="kr-actions-wrapper" *ngIf="groupId">
+    <button mat-button [routerLink]="editGroup()">Edit <i>{{groupId}}</i> group<mat-icon matPrefix>mode_edit</mat-icon></button>
+  </div>
+
+  <div class="kr-spacer-large"></div>
+
+  <div class="kr-table-wrapper">
+    <table mat-table [dataSource]="data" matSort matSortDirection="desc" matSortActive="datetime" matSortDisableClear>
+      <ng-container matColumnDef="datetime" sticky>
+        <th mat-header-cell mat-sort-header *matHeaderCellDef class="kr-column-right-border"> Timestamp </th>
+        <td mat-cell *matCellDef="let element" class="kr-column-right-border kr-text-center">
+          {{ convertDate(element) | date:'dd/MM/yy HH:mm:ss'}}
+        </td>
+      </ng-container>
+      <ng-container [matColumnDef]="'state.'+column.id" style="max-width: 200px;" *ngFor="let column of columns; let i = index;">
+        <th [appTableResize]="true" [index]="i" mat-header-cell *matHeaderCellDef>
+          {{column.readable_name || column.id}}
+        </th>
+        <td mat-cell *matCellDef="let element" class="kr-text-center">
+          <span>
+            <span *ngIf="!thereIsNoData(element.data().state[column.id])">
+              <app-table-cell [highlight]="isChanged(column, element)" [highlightAccent]="thereIsNoData(element.data().state[column.id])" [text]="element.data().state[column.id]"></app-table-cell>
+            </span>
+            <span *ngIf="thereIsNoData(element.data().state[column.id])"><i>[No data]</i></span>
+          </span>
+        </td>
+      </ng-container>
+
+
+      <!-- <ng-container matColumnDef="actions">
+        <th mat-header-cell class="group-action" *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button [routerLink]="'/data/detail/' + element.id">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container> -->
+
+      <tr mat-header-row *matHeaderRowDef="columnIds;"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnIds;"></tr>
+    </table>
+
+  </div>
+  <!-- END TABLE WRAPPER -->
+  <mat-paginator [length]="resultsLength" [pageSize]="itemsPerPage" [pageSizeOptions]="elementPerPage"></mat-paginator>
+</div>

@@ -1,0 +1,114 @@
+<div class="kr-generic-container" id="kr-table">
+
+  <app-data-back-button [group]="groupId!"></app-data-back-button>
+
+  <h2><i class="fa-solid fa-bolt"></i> Event sourcing for entity <i>{{id}}</i></h2>
+
+  <div class="kr-actions-wrapper" *ngIf="groupId">
+    <button mat-button [routerLink]="editGroup()">Edit <i>{{groupId}}</i> group<mat-icon matPrefix>mode_edit</mat-icon></button>
+  </div>
+
+  <div class="kr-spacer-large"></div>
+
+  <div class="kr-filter-container kr-evt-filters">
+    <app-column-date-filter #columnDateFilter [columns]="columns" (filter)="filterEvt($event)"></app-column-date-filter>
+  </div>
+
+  <div class="kr-table-wrapper">
+    <table mat-table [dataSource]="data" matSort matSortDirection="desc" matSortActive="datetime" matSortDisableClear>
+      <ng-container matColumnDef="datetime" sticky>
+        <th mat-header-cell mat-sort-header *matHeaderCellDef class="kr-column-right-border"> Timestamp </th>
+        <td mat-cell *matCellDef="let element" class="kr-column-right-border kr-text-center">
+          {{ convertDate(element) | date:'dd/MM/yy HH:mm:ss'}}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="action" sticky>
+        <th mat-header-cell *matHeaderCellDef class="kr-column-right-border">Check rows...</th>
+        <td mat-cell *matCellDef="let element" class="kr-evt-src-table-actions kr-column-right-border">
+          <button (click)="jumpTo('from', element)" mat-stroked-button>Since this date</button>
+          <button (click)="jumpTo('to', element)" mat-stroked-button>Until this date</button>
+        </td>
+      </ng-container>
+      <ng-container [matColumnDef]="'state.'+column.id" *ngFor="let column of columns; let i = index;">
+        <th mat-header-cell *matHeaderCellDef>
+          {{column.readable_name || column.id}}
+        </th>
+        <td mat-cell *matCellDef="let element" class="kr-text-center">
+          <span>
+            <span *ngIf="!thereIsNoData(element.data().state[column.id])">
+              <app-table-cell [highlight]="isChanged(column, element)" [highlightAccent]="thereIsNoData(element.data().state[column.id])" [text]="element.data().state[column.id]"></app-table-cell>
+            </span>
+            <span *ngIf="thereIsNoData(element.data().state[column.id])"><i>[No data]</i></span>
+          </span>
+        </td>
+      </ng-container>
+
+
+      <!-- <ng-container matColumnDef="actions">
+      <th mat-header-cell class="group-action" *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button [routerLink]="'/data/detail/' + element.id">
+          <mat-icon>visibility</mat-icon>
+        </button>
+      </td>
+    </ng-container> -->
+
+      <tr mat-header-row *matHeaderRowDef="columnIds;"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnIds;"></tr>
+    </table>
+
+  </div>
+  <!-- END TABLE WRAPPER -->
+  <mat-paginator [length]="resultsLength" [pageSize]="itemsPerPage" [pageSizeOptions]="elementPerPage"></mat-paginator>
+</div>
+
+
+<!-- <mat-card>
+  <mat-card-header>
+    <mat-card-title><i>
+        Group: <button mat-button [routerLink]="editGroup()">
+          {{groupId}}
+          <mat-icon matPrefix>open_in_new</mat-icon>
+        </button>
+
+      </i>/ {{id}}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div fxLayout="row" fxLayoutAlign="end center">
+      <mat-form-field>
+        <mat-label>
+          Filter
+        </mat-label>
+        <mat-icon matSuffix>search</mat-icon>
+        <input matInput (keyup)="filterChanged.emit($event)" [(ngModel)]="filterStr" #input>
+      </mat-form-field>
+    </div>
+    <table mat-table [dataSource]="data" matSort matSortDirection="desc" matSortActive="datetime" matSortDisableClear>
+      <ng-container matColumnDef="datetime">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef> Timestamp </th>
+        <td mat-cell *matCellDef="let element">
+          <small>{{element.datetime | date:'dd/MM/yy HH:mm:ss'}}</small>
+        </td>
+      </ng-container>
+      <ng-container [matColumnDef]="column.id" *ngFor="let column of columns">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef> {{column.readable_name || column.id}} </th>
+        <td mat-cell *matCellDef="let element" [class.changed]="isChanged(column, element)">
+          {{element.state[column.id]}}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell class="group-action" *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button [routerLink]="'/data/detail/' + element.id">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnIds"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnIds;"></tr>
+    </table>
+    <mat-paginator #evtSourcePaginator [length]="resultsLength" [pageSize]="itemsPerPage" [pageSizeOptions]="itemsPerPageOptions"></mat-paginator>
+  </mat-card-content>
+</mat-card> -->

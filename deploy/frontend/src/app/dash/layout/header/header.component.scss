@@ -1,0 +1,61 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+@import "../../../../scss/utils.scss";
+
+.mat-toolbar {
+  background-color: $kr-coolgray;
+  color: $kr-night;
+  @extend .kr-shadow-2;
+
+  #logo {
+    font-size: $kr-text-large;
+    font-weight: bold;
+
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: $kr-space-base;
+
+    text-decoration: none;
+
+    img {
+      // margin-right: 0.5rem;
+      height: 36px;
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  .kr-menu-btn-wrapper {
+    display: flex;
+    align-items: center;
+    height: 100%;
+
+    button {
+      font-size: $kr-text;
+      margin: 0 $kr-space-base;
+      transition: all 0.1s;
+
+      i {
+        font-size: $kr-text-medium;
+      }
+
+      &:last-of-type {
+        margin-right: 0;
+      }
+
+      &:hover {
+        box-shadow: 0 0 0 1px $kr-night;
+      }
+    }
+
+    .kr-menu-divider {
+      width: 1px;
+      height: 100%;
+      background-color: $kr-night;
+      display: inline-block;
+    }
+  }
+}

@@ -1,0 +1,61 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+table {
+  th:nth-child(-n + 2) {
+    width: 1%;
+  }
+
+  .kr-automation-status-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $kr-space-small;
+
+    .kr-led-wrapper {
+      $led-size: 18px;
+
+      display: inline-block;
+      width: $led-size;
+      height: $led-size;
+      border-radius: 50%;
+      border: 1px solid $kr-night;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .kr-led {
+        $led-inner-size: 12px;
+
+        width: $led-inner-size;
+        height: $led-inner-size;
+        border-radius: 50%;
+
+        &.kr-led-on {
+          background-color: $kr-success;
+        }
+        &.kr-led-off {
+          background-color: $kr-danger;
+        }
+      }
+    }
+  }
+  .kr-column-channel {
+    display: flex;
+    gap: $kr-space-medium;
+    align-items: center;
+    justify-content: center;
+    .kr-channel-element {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $kr-space-small;
+
+      img {
+        height: 20px;
+      }
+    }
+  }
+}

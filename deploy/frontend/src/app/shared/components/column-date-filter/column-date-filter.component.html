@@ -1,0 +1,77 @@
+<form>
+  <div class="kr-evt-src-filters-wrapper">
+
+    <div class="kr-filter-col">
+      <h4 class="kr-mb-small">Filter rows by data that changed</h4>
+
+      <div class="kr-cols-input-wrapper">
+        <mat-form-field>
+          <mat-label>Select columns where you want to check data</mat-label>
+          <mat-select [formControl]="chosenColumns" multiple (ngModelChange)="submit()">
+            <mat-option *ngFor="let option of allColumns" [value]="option.id">
+              {{option.id}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+    </div>
+    <!-- END COLUMN LEFT -->
+
+    <div class="kr-filter-col">
+      <h4 class="kr-mb-small">Filter by date</h4>
+
+      <div class="kr-date-input-wrapper">
+        <mat-form-field>
+          <mat-label>Choose filter type</mat-label>
+          <mat-select [formControl]="filterType" (ngModelChange)="submit()">
+            <mat-option *ngFor="let option of filterTypeOptions" [value]="option">
+              {{option.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- <mat-form-field [hidden]="!filterType.value?.enableFrom">
+          <mat-label>From</mat-label>
+          <input name="fromDate" matInput [(ngModel)]="fromDate" (dateInput)="submit()" [matDatepicker]="pickerFrom">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+        </mat-form-field> -->
+
+        <!-- <mat-form-field [hidden]="!filterType.value?.enableTo">
+          <mat-label>To</mat-label>
+          <input name="toDate" matInput [(ngModel)]="toDate" (dateInput)="submit()" [matDatepicker]="pickerTo">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+        </mat-form-field> -->
+        <mat-form-field [hidden]="!filterType.value?.enableFrom">
+          <mat-label>Starting date</mat-label>
+          <input matInput [formControl]="fromDate" (dateInput)="submit()" [ngxMatDatetimePicker]="pickerFrom" placeholder="From">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matSuffix [for]="$any(pickerFrom)"></mat-datepicker-toggle>
+          <ngx-mat-datetime-picker #pickerFrom [showSeconds]="true" [stepHour]="1" [stepMinute]="1" [stepSecond]="1">
+          </ngx-mat-datetime-picker>
+        </mat-form-field>
+
+        <mat-form-field [hidden]="!filterType.value?.enableTo">
+          <mat-label>Ending date</mat-label>
+          <input matInput [formControl]="toDate" (dateInput)="submit()" [ngxMatDatetimePicker]="pickerTo" placeholder="To">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matSuffix [for]="$any(pickerTo)"></mat-datepicker-toggle>
+          <ngx-mat-datetime-picker #pickerTo [showSeconds]="true" [stepHour]="1" [stepMinute]="1" [stepSecond]="1">
+          </ngx-mat-datetime-picker>
+        </mat-form-field>
+      </div>
+      <!-- END WRAPPER INPUT -->
+
+    </div>
+    <!-- END COLUMN RIGHT -->
+
+  </div>
+  <!-- END WRAPPER -->
+
+  <div *ngIf="isDirty()" class="kr-reset-btn-wrapper" (click)="reset()">
+    <i class="fa-solid fa-circle-xmark"></i> Reset all filters
+  </div>
+
+</form>

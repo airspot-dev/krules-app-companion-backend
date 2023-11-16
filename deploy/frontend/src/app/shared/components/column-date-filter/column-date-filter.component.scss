@@ -1,0 +1,50 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+
+$wrapper-gap: $kr-space-large;
+$inputs-margin: $kr-space-base;
+
+.kr-evt-src-filters-wrapper {
+  width: 100%;
+  display: flex;
+  gap: $wrapper-gap;
+  margin-bottom: $kr-space-small;
+
+  .kr-filter-col {
+    width: 50%;
+
+    .kr-cols-input-wrapper {
+      .mat-mdc-form-field { width: 100%; }
+    }
+
+    .kr-date-input-wrapper {
+      display: flex;
+      justify-content: flex-start;
+
+      .mat-mdc-form-field {
+        width: calc( ( 100% - ( $inputs-margin * 2 ) ) / 3 );
+
+        &  + .mat-mdc-form-field {
+          margin-left: $inputs-margin;
+        }
+        &:last-of-type {
+          margin-left: 0;
+        }
+      }
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+  }
+}
+
+.kr-reset-btn-wrapper {
+  margin-bottom: $kr-space-base;
+  cursor: pointer;
+  display: inline-block;
+  font-style: italic;
+
+  &:hover { text-decoration: underline; }
+}

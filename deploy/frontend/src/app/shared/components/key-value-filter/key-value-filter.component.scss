@@ -1,0 +1,52 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+
+.kr-filter-wrapper {
+  width: 100%;
+  margin-bottom: $kr-space-micro;
+
+  .mat-mdc-standard-chip {
+    // --mdc-chip-elevated-container-color: #e0e0e0;
+    // --mdc-chip-elevated-disabled-container-color: #e0e0e0;
+    --mdc-chip-label-text-color: white;
+    // --mdc-chip-disabled-label-text-color: #212121;
+    --mdc-chip-with-icon-icon-color: white;
+    --mdc-chip-with-icon-disabled-icon-color: white;
+    --mdc-chip-with-trailing-icon-disabled-trailing-icon-color: white;
+    --mdc-chip-with-trailing-icon-trailing-icon-color: white;
+    --mdc-chip-with-icon-selected-icon-color: white;
+
+    margin-top: $kr-space-small;
+    margin-bottom: $kr-space-small;
+  }
+
+  .kr-chip-condition {
+    background-color: $kr-yellow;
+  }
+  .kr-chip-operator {
+    background-color: $kr-night;
+  }
+
+  .mat-mdc-chip-input {
+    margin-left: 0;
+    margin-top: $kr-space-micro;
+
+    // color: $kr-yellow;
+  }
+}
+
+.mat-mdc-option {
+  min-height: 36px;
+
+  &.divider {
+    min-height: 18px;
+
+    &:after {
+      display: block;
+      content: "";
+      height: 1px;
+      width: 100%;
+      background-color: $kr-night;
+    }
+  }
+}

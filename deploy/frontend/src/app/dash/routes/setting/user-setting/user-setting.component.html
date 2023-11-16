@@ -1,0 +1,60 @@
+<div class="kr-generic-container">
+
+  <mat-tab-group dynamicHeight #tabGroup>
+
+    <mat-tab #tab1 label="Global settings">
+      <ng-template mat-tab-label>
+        <mat-icon>public</mat-icon> Global settings
+      </ng-template>
+
+      <div class="kr-spacer-large"></div>
+      <h3>Set a custom logo and a brand name for this istance.</h3>
+      <div class="kr-spacer-large"></div>
+
+      <form [formGroup]="gloablSettingForm" (ngSubmit)="submitGlobal()" id="form-brand-wrapper">
+
+        <mat-form-field>
+          <mat-label>Brand name</mat-label>
+          <input matInput formControlName="brandName" placeholder="KRules Companion">
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Logo URL</mat-label>
+          <input matInput formControlName="brandLogoUrl">
+        </mat-form-field>
+
+        <div class="kr-spacer-medium"></div>
+        <button mat-stroked-button>Save</button>
+
+      </form>
+    </mat-tab>
+
+    <mat-tab #tab2 label="Personal settings">
+      <ng-template mat-tab-label>
+        <mat-icon>person</mat-icon> User settings
+      </ng-template>
+
+      <div class="kr-spacer-large"></div>
+      <h3>Set how many rows you want to show up by default.</h3>
+      <div class="kr-spacer-large"></div>
+
+      <form [formGroup]="userSettingForm" (ngSubmit)="submitProfile()" id="form-brand-wrapper">
+
+        <mat-form-field>
+          <mat-label>Element per page</mat-label>
+          <mat-select formControlName="elementPerPage">
+            <mat-option *ngFor="let n of elementPerPage" [value]="n">
+              {{n}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="kr-spacer-medium"></div>
+        <button mat-stroked-button>Save</button>
+
+      </form>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

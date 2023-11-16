@@ -1,0 +1,36 @@
+@import "brand.scss";
+
+// TYPOGRAPHY
+$kr-text-small: 0.8rem;
+$kr-text: 1rem;
+$kr-text-medium: 1.2rem;
+$kr-text-large: 1.6rem;
+
+
+// SPACING UTILS
+$kr-space-micro: 0.25rem;
+$kr-space-small: 0.5rem;
+$kr-space-base: 1rem;
+$kr-space-medium: 1.5rem;
+$kr-space-large: 2rem;
+
+
+// LAYOUT
+$kr-box-radius: 7px;
+
+@mixin kr-box-default {
+  padding: $kr-space-base;
+  background-color: white;
+  border-radius: $kr-box-radius;
+  @extend .kr-shadow-1;
+}
+
+@mixin kr-fading-list {
+  width: 100%;
+  height: 40px;
+  content: '';
+  background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+  position: absolute;
+  bottom: 0;
+  pointer-events: none;
+}

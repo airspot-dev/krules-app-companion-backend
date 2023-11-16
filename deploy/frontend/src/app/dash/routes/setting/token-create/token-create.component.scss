@@ -1,0 +1,46 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+.kr-new-api-keys-wrapper {
+  display: flex;
+  gap: $kr-space-base;
+
+  .kr-api-column {
+    width: calc(50% - ($kr-space-base / 2));
+
+    .mat-mdc-form-field {
+      width: 50%;
+    }
+
+    .kr-api-realm-wrapper {
+      border: 1px solid $kr-coolgray-dark;
+      border-radius: $kr-box-radius;
+      overflow: auto;
+      margin-bottom: $kr-space-medium;
+
+      .kr-api-realm-header {
+        background-color: $kr-torquoise;
+        padding: 0 $kr-space-small;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .kr-api-realm-title {
+          font-weight: bold;
+        }
+      }
+      .kr-api-realm-permissions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $kr-space-small;
+        padding: $kr-space-small 0;
+
+        & > * {
+          width: calc((100% - ($kr-space-small * 2)) / 3);
+        }
+      }
+    }
+  }
+}

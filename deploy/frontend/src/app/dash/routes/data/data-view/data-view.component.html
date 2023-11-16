@@ -1,0 +1,105 @@
+<div [hidden]="!groups.length">
+
+  <div class="kr-data-container" [class.collapsed]="collapsed">
+
+    <div class="kr-sidebar" id="kr-sidebar">
+
+      <div class="kr-sidebar-tools">
+
+        <mat-button-toggle-group #tgGroup>
+          <mat-button-toggle value="list" (click)="viewType='list'" [checked]="viewType=='list'" aria-label="List View">
+            <mat-icon>list</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="tree" (click)="viewType='tree'" [checked]="viewType=='tree'" aria-label="Tree View">
+            <mat-icon>account_tree</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <a (click)="collapsed=!collapsed" class="kr-sidebar-btn kr-shadow-1" title="Hide sidebar">
+          <i class="fa-solid fa-compress"></i>
+        </a>
+
+      </div>
+
+      <div *ngIf="viewType == 'tree'" class="kr-faded-view">
+        <h3><i class="fa-solid fa-shapes"></i> Groups</h3>
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+          <!-- This is the tree node template for leaf nodes -->
+          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding matTreeNodePaddingIndent="20">
+            <!-- use a disabled button to provide padding for tree leaf -->
+            <button mat-icon-button disabled></button>
+            <mat-radio-button [value]="node.id" [checked]="node.id===groupId" (click)="clickNode(node.id)">
+              {{node.name}}
+            </mat-radio-button>
+          </mat-tree-node>
+          <!-- This is the tree node template for expandable nodes -->
+          <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding matTreeNodePaddingIndent="20">
+            <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
+              <mat-icon class="mat-icon-rtl-mirror">
+                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+              </mat-icon>
+            </button>
+            {{node.name}}
+          </mat-tree-node>
+        </mat-tree>
+      </div>
+      <div *ngIf="viewType == 'list'" class="kr-faded-view">
+        <form>
+          <mat-form-field appearance="fill">
+            <mat-label>Search for a group...</mat-label>
+            <input type="text" placeholder="Type group name or ID" aria-label="Number" matInput [formControl]="selectedGroup" [matAutocomplete]="auto">
+            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="updateGroupByAutocomplete($event)">
+              <mat-option *ngFor="let option of filteredOptions | async" [value]="option.id">
+                {{option.id}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </form>
+        <h3><i class="fa-solid fa-shapes"></i> Groups</h3>
+        <mat-selection-list #groupsList [(ngModel)]="selectionList" (ngModelChange)="updateGroupByList($event)" [multiple]="false">
+          <div *ngFor="let option of groups">
+            <mat-list-option [value]="option.id" [disabled]="option._deleting">
+              {{option.name}}<br>
+              <small><i>{{option.id}}</i></small>
+            </mat-list-option>
+            <mat-divider></mat-divider>
+          </div>
+        </mat-selection-list>
+      </div>
+    </div>
+    <!-- END SIDEBAR -->
+
+    <div class="kr-table" id="kr-table">
+      <a (click)="collapsed=!collapsed" class="kr-sidebar-btn kr-shadow-1" title="Show sidebar" *ngIf="collapsed">
+        <i class="fa-solid fa-expand"></i>
+      </a>
+      <div id="group-table-header">
+        <h2><i class="fa-solid fa-database"></i> {{group?.name}}</h2>
+        <div *ngIf="groupId">
+          <small class="kr-text-monospace">Group ID: {{groupId}}</small>
+          <div class="kr-spacer-small" *ngIf="group?.description"></div>
+          <small class="kr-text-light" *ngIf="group?.description">Group description</small>
+          <p>{{group?.description}}</p>
+          <div class="kr-spacer-small"></div>
+        </div>
+      </div>
+      <div class="kr-actions-wrapper" *ngIf="groupId">
+        <!-- <mat-slide-toggle [(ngModel)]="isLive" class="kr-mr-small kr-mb-small">Live stream</mat-slide-toggle><br> -->
+        <button mat-button [routerLink]="editGroup()">Edit group<mat-icon matPrefix>mode_edit</mat-icon></button>
+        <button mat-button (click)="openDialog()">Delete group<mat-icon matPrefix>delete</mat-icon></button>
+      </div>
+
+      <app-group-table [collapsed]="collapsed" [groupId]="groupId"></app-group-table>
+
+    </div>
+    <!-- END TABLE -->
+
+  </div>
+  <!-- END CONTAINER -->
+
+</div>
+<!-- END IF THERE ARE GROUPS -->
+
+<div *ngIf="!groups.length" class="kr-layout-center">
+  <h1>Sorry, there's no data here!</h1>
+</div>

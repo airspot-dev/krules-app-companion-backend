@@ -1,0 +1,21 @@
+<div class="kr-generic-container">
+
+  <h2><i class="fa-solid fa-satellite-dish"></i> My Channels</h2>
+
+  <div class="kr-actions-wrapper">
+    <button mat-button [routerLink]="createChannel()">Create new channel<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div class="kr-spacer-large"></div>
+
+  <div *ngIf="!channels.length" class="kr-layout-center">
+    <h2>No channels yet.</h2>
+    <p>Start by creating your first channel!</p>
+    <div class="kr-spacer-large"></div>
+    <button mat-stroked-button [routerLink]="createChannel()">Create new chanel<mat-icon matPrefix>add</mat-icon></button>
+  </div>
+
+  <div *ngIf="channels.length" class="kr-channel-card-container">
+    <app-channel-card [channel]="channel" *ngFor="let channel of channels" class="kr-channel-card-component"></app-channel-card>
+  </div>
+</div>

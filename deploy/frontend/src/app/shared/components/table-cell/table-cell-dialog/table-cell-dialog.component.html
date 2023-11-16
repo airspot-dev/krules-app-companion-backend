@@ -1,0 +1,38 @@
+<div class="kr-dialogs-content-wrapper kr-dialog-editor-wrapper">
+
+  <ngx-monaco-editor (onInit)="onEditorInit($event)" [disabled]="true" [options]="editorOptions" [(ngModel)]="data.text"></ngx-monaco-editor>
+  <div class="kr-spacer-base"></div>
+  <mat-form-field>
+    <mat-label>
+      Content language:
+    </mat-label>
+    <mat-select [(ngModel)]="language" (ngModelChange)="onLanguageChange($event)">
+      <mat-option *ngFor="let lang of languages" [value]="lang">
+        {{lang}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+</div>
+
+<div class="kr-dialogs-btn-wrapper">
+
+  <div class="kr-dialog-action-main">
+    <button mat-button (click)="format()">
+      <mat-icon matPrefix>data_object</mat-icon> Format content
+    </button>
+
+    <app-button-cliboard [text]="data.text"></app-button-cliboard>
+
+    <button mat-button [disabled]="!canRevert()" (click)="revert()">
+      <mat-icon matPrefix>history</mat-icon> Revert changes
+    </button>
+  </div>
+
+  <div class="kr-dialog-action-end">
+    <button mat-button mat-dialog-close>
+      <mat-icon matPrefix>close</mat-icon> Close
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,52 @@
+@use "@angular/material" as mat;
+@use "sass:map";
+@import "brand.scss";
+
+@include mat.core();
+
+$theme-foreground-palette: (
+  base: $kr-night,
+  divider: rgba(0, 0, 0, 0.12),
+  dividers: $kr-grey,
+  disabled: $kr-coolgray,
+  disabled-button: $kr-coolgray,
+  disabled-text: $kr-coolgray,
+  // elevation: $kr-night,
+  hint-text: $kr-night,
+  secondary-text: $kr-night,
+  icon: $kr-night,
+  icons: $kr-night,
+  text: $kr-night,
+  // slider-min: $kr-night,
+  // slider-off: $kr-coolgray,
+  // slider-off-active: $kr-night,,
+);
+
+@function define-theme($config) {
+  $theme: mat.define-light-theme($config);
+  $color: map.get($theme, color);
+  $color: map.merge(
+    $color,
+    (
+      // background: $theme-background-palette,
+      foreground: $theme-foreground-palette
+    )
+  );
+  @return map.merge(
+    $theme,
+    (
+      color: $color,
+    )
+  );
+}
+
+$app-theme: define-theme(
+  (
+    color: (
+      primary: mat.define-palette($md-krcoolgray),
+      accent: mat.define-palette($md-krnight),
+      // warn: mat.define-palette($md-kryellow),
+    ),
+  )
+);
+@include mat.all-component-themes($app-theme);

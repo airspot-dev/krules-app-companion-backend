@@ -1,0 +1,187 @@
+// @import "~@angular/material/theming";
+// @include mat-core();
+@import "themes.scss";
+@import "vars.scss";
+@import "utils.scss";
+
+// .light-theme {
+//   @include angular-material-theme($light-theme);
+// }
+// .dark-theme {
+//   @include angular-material-theme($dark-theme);
+//   background-color: black;
+// }
+
+
+
+html,
+body {
+  font-family: "Roboto", sans-serif;
+
+  color: $kr-night;
+  background-color: $kr-torquoise;
+
+  margin: 0;
+  box-sizing: border-box;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+    margin-bottom: $kr-space-small;
+  }
+  p {
+    margin-top: $kr-space-micro;
+    margin-bottom: $kr-space-base;
+    line-height: 1.35rem;
+  }
+  a {
+    color: $kr-night;
+    text-decoration: underline;
+    transition: all 0.15s;
+
+    &:hover {
+      background-color: $kr-yellow;
+      text-decoration: none;
+    }
+  }
+
+  .kr-text-monospace {
+    font-family: "Roboto Mono", monospace;
+  }
+
+  .kr-generic-container {
+    @include kr-box-default;
+    min-height: calc(100vh - 64px - 2rem);
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .kr-project-menu {
+    .mat-mdc-menu-content {
+      padding-top: 0;
+
+      .kr-submenu-title {
+        color: $kr-night;
+        background-color: $kr-torquoise;
+        padding: $kr-space-small $kr-space-base;
+
+        h4 {
+          font-weight: bold;
+          line-height: 24px;
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .kr-actions-wrapper {
+    position: absolute;
+    top: $kr-space-base;
+    right: $kr-space-base;
+    text-align: right;
+  }
+
+  // FILTER COMMONS
+  .kr-filter-container {
+    padding: $kr-space-base;
+    margin-bottom: $kr-space-base;
+    background-color: $kr-grey-extra-light;
+    border-radius: $kr-box-radius;
+    border: 1px solid $kr-grey;
+
+    h4 {
+      margin-top: 0;
+    }
+
+    &.kr-evt-filters {
+      padding-bottom: 0;
+    }
+
+    &:not(.kr-evt-filters) {
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+    }
+  }
+
+  // INPUT HINTS
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    padding: 0 0 0 8px;
+
+    .mat-mdc-form-field-hint {
+      font-size: $kr-text-small;
+      color: $kr-grey;
+    }
+  }
+
+  // CHANNEL CARDS + AUTOMATIONS + INPUTS GRID
+
+  $kr-cards-per-line: 4;
+  $kr-cards-gaps-no: $kr-cards-per-line - 1;
+  $kr-cards-gap: $kr-space-medium;
+
+  .kr-channel-card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $kr-cards-gap;
+
+    .kr-channel-card-component {
+      width: calc(
+        (100% - ($kr-cards-gap * $kr-cards-gaps-no)) / $kr-cards-per-line
+      );
+    }
+  }
+
+  .kr-automation-inputs-wrapper {
+    .mat-mdc-form-field {
+      min-width: calc(
+        (100% - ($kr-cards-gap * $kr-cards-gaps-no)) / $kr-cards-per-line
+      );
+    }
+    &.kr-automation-inputs-wrapper-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $kr-cards-gap;
+      & > * {
+        width: calc(
+          (100% - ($kr-cards-gap * $kr-cards-gaps-no)) / $kr-cards-per-line
+        );
+      }
+    }
+  }
+
+  .kr-suggestion-container {
+    button {
+      .mdc-button__label {
+        font-size: $kr-text-small;
+        text-transform: uppercase;
+      }
+      &.mat-mdc-outlined-button {
+        font-family: "Roboto", sans-serif;
+        font-size: $kr-text-small;
+        text-transform: uppercase;
+        height: 24px;
+        padding: 0 18px;
+
+        &:first-of-type {
+          background-color: $kr-yellow;
+        }
+      }
+    }
+  }
+
+  .kr-pre-code {
+    background-color: #3c3c3c;
+    color: white;
+    padding: $kr-space-base;
+  }
+}
+
+@import "tables.scss";
+@import "overrides.scss";
+@import "draggable.scss";

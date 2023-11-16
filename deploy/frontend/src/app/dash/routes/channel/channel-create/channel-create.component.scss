@@ -1,0 +1,97 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+.kr-stepper-channel-chooser {
+
+  margin-top: $kr-space-base;
+  margin-bottom: $kr-space-medium;
+  display: flex;
+  gap: $kr-space-base;
+
+  .button {
+    margin-right: $kr-space-large;
+    width: 200px;
+    height: 50px;
+    position: relative;
+
+    background-color: $kr-torquoise;
+
+    transition: all 0.1s;
+    &:hover { @extend .kr-shadow-3; }
+
+    &:has( input[type="radio"]:checked + label ) {
+      box-shadow: none;
+      cursor: default;
+    }
+
+    label,
+    input {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin: 0;
+    }
+
+    label {
+      z-index: 90;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 4px;
+      border: 1px solid $kr-coolgray;
+
+      img { height: 30px; margin-right: 10px; }
+    }
+
+    input[type="radio"] {
+      opacity: 0;
+      z-index: 100;
+
+      &:not(:checked):hover { cursor: pointer; }
+
+      &:checked + label {
+        transition: all 0.1s;
+        background-color: $kr-night;
+        cursor: default;
+        color: white;
+
+        border: 1px solid $kr-night;
+        border-radius: 4px;
+        box-shadow: none;
+      }
+    }
+
+  }
+}
+
+.kr-stepper-params-config {
+
+  margin-top: $kr-space-base;
+
+  .mat-mdc-form-field {
+    min-width: 300px;
+  }
+
+  .kr-stepper-params-config-webhook {
+    margin: $kr-space-base 0 $kr-space-medium 0;
+
+    table {
+      vertical-align: baseline;
+
+      tr td { padding-top: $kr-space-base; }
+      tr:first-of-type {
+
+        td { border-bottom: 1px solid $kr-night; padding-top: 0; }
+      }
+
+      .mat-mdc-form-field { margin-right: $kr-space-base; }
+    }
+
+  }
+
+}

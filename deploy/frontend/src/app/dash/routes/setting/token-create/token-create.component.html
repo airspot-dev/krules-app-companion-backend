@@ -1,0 +1,89 @@
+<div class="kr-generic-container">
+
+  <h2><i class="fa-solid fa-key"></i> Create a new API Key</h2>
+  <div class="kr-spacer-large"></div>
+
+  <form id="form-brand-wrapper">
+
+    <div class="kr-new-api-keys-wrapper">
+
+
+
+      <div class="kr-api-column">
+
+        <p><b>Give your API Key a friendly name</b></p>
+        <mat-form-field>
+          <mat-label>Name</mat-label>
+          <input type="text" required matInput name="name" [(ngModel)]="newApiKey.name" placeholder="name">
+        </mat-form-field>
+
+        <div class="kr-spacer-medium"></div>
+
+        <p><b>Leave a personal note to help you recognize and understand this API Key</b> – <i>Optional</i></p>
+        <mat-form-field>
+          <mat-label>Notes</mat-label>
+          <textarea rows="3" name="notes" [(ngModel)]="newApiKey.note" matInput placeholder=""></textarea>
+        </mat-form-field>
+
+        <div class="kr-spacer-medium"></div>
+
+        <p><b>Limit this API Key only to some IPs</b> – <i>Optional</i></p>
+        <mat-form-field>
+          <mat-label>One IP per row {{checkIps()}}</mat-label>
+          <textarea [(ngModel)]="newApiKey.ipsTextual" name="ips" rows="5" matInput placeholder="89.79.131.123&#10;89.79.132.125..."></textarea>
+          <mat-hint *ngIf="!checkIps()">
+            <span class="kr-text-danger">
+              Wrong IP format
+            </span>
+          </mat-hint>
+
+        </mat-form-field>
+
+        <div class="kr-spacer-medium"></div>
+
+        <p><b>Set an expiration date</b> – <i>Optional</i></p>
+        <mat-form-field>
+          <mat-label>Expiration Date</mat-label>
+          <input [(ngModel)]="newApiKey.expireAt" name="expireAt" matInput [matDatepicker]="picker">
+          <mat-hint>MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+      </div>
+      <!-- END FIRST COLUMN -->
+
+      <!-- ROLE LIST -->
+      <div class="kr-api-column">
+
+        <p><b>Set permissions applied to every Group and Entity when using this API Key</b></p>
+
+        <div *ngFor="let scope of scopes" class="kr-api-realm-wrapper">
+          <div class="kr-api-realm-header">
+            <div class="kr-api-realm-title" [matTooltip]="scope.data().description">{{scope.data().name}}</div>
+            <mat-checkbox [checked]="scopeAllCompleted[scope.data().scope]" [name]="'scope_' + scope.data().scope" [indeterminate]="someComplete(scope.data().scope)" (change)="setAll($event.checked, scope.data().scope)">
+              Select all
+            </mat-checkbox>
+          </div>
+          <div class="kr-api-realm-permissions">
+            <div *ngFor="let permission of scope.data().permissions">
+              <mat-checkbox (change)="togglePermission(scope.data().scope,permission.permission)" [checked]="newApiKey.scopes[scope.data().scope][permission.permission]" [name]="'scope_' + scope.data().scope + '_permission_'+ permission.permission">
+                {{permission.name}}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END ROLE LIST -->
+
+    </div>
+    <!-- END API EDIT WRAPPER -->
+
+    <div class="kr-spacer-large"></div>
+    <button *ngIf="isUpdating" [disabled]="isDisabled()" (click)="updateToken()" mat-stroked-button>Update API Key <mat-icon matPrefix>save</mat-icon></button>
+    <button *ngIf="!isUpdating" [disabled]="isDisabled()" (click)="createToken()" mat-stroked-button>Create API Key <mat-icon matPrefix>add</mat-icon></button>
+    <button class="kr-ml-base" color="warn" mat-stroked-button routerLink="/setting/token/list">
+      <mat-icon matPrefix>close</mat-icon> Cancel
+    </button>
+  </form>
+</div>

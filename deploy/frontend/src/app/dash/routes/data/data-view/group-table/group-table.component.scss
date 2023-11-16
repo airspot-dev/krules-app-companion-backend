@@ -1,0 +1,93 @@
+@import "../../../../../../scss/vars.scss";
+@import "../../../../../../scss/brand.scss";
+
+.kr-no-groups-wrapper {
+  font-size: $kr-text-medium;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@-webkit-keyframes flashing-background {
+  0% {
+    background-color: white;
+  }
+  10% {
+    background-color: lighten($kr-yellow, 40%);
+  }
+  100% {
+    background-color: white;
+  }
+}
+@keyframes flashing-background {
+  0% {
+    background-color: white;
+  }
+  10% {
+    background-color: lighten($kr-yellow, 40%);
+  }
+  100% {
+    background-color: white;
+  }
+}
+@-webkit-keyframes flashing-text {
+  0% {
+    color: $kr-night;
+  }
+  10% {
+    color: $kr-danger;
+  }
+  100% {
+    color: $kr-night;
+  }
+}
+@keyframes flashing-text {
+  0% {
+    color: $kr-night;
+  }
+  10% {
+    color: $kr-danger;
+  }
+  100% {
+    color: $kr-night;
+  }
+}
+
+.modified-animation {
+  -webkit-animation: flashing-background 3s; /* Chr, Saf */
+  animation: flashing-background 3s; /* IE >9, Fx >15, Op >12.0 */
+
+  // .mdc-data-table__cell {
+  //   -webkit-animation: flashing-text 3s; /* Chr, Saf */
+  //   animation: flashing-text 3s; /* IE >9, Fx >15, Op >12.0 */
+  // }
+}
+
+.kr-no-data-msg {
+  font-size: $kr-text-large;
+}
+
+tbody tr td:first-of-type { background-color: white; }
+tbody tr.modified-animation td:first-of-type { @extend .modified-animation }
+
+.kr-is-deleting {
+
+  td {
+    position: relative;
+
+    &:after {
+      position: absolute;
+      content: "";
+      display: block;
+      opacity: 0.7;
+      background-color: white;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+  }
+}

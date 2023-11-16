@@ -1,0 +1,32 @@
+<mat-card class="kr-channel-card" [class.clickable]="isClickable" [class.selected]="isSelected">
+  <mat-card-header>
+    <mat-card-title-group>
+      <mat-card-title><b>{{channel?.name}}</b></mat-card-title>
+      <mat-card-subtitle><small>{{channel?.type}}</small></mat-card-subtitle>
+      <mat-card-subtitle class="kr-text-monospace"><small>{{channel?.slug}}</small></mat-card-subtitle>
+
+      <img mat-card-sm-image [src]="channel?.imageNeg" *ngIf="isSelected">
+      <img mat-card-sm-image [src]="channel?.image" *ngIf="!isSelected">
+    </mat-card-title-group>
+  </mat-card-header>
+
+  <div class="kr-spacer-base"></div>
+
+  <mat-card-content>
+    <small>
+      <span class="">{{channel?.previewKey}}</span>
+      <br>
+      <i>{{channel?.preview}}</i></small>
+  </mat-card-content>
+
+  <mat-card-actions *ngIf="!small">
+    <mat-divider></mat-divider>
+    <button mat-button [routerLink]="edit()">
+      <mat-icon>edit</mat-icon> Edit
+    </button>
+    <button mat-button (click)="delete()">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+
+  </mat-card-actions>
+</mat-card>

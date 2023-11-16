@@ -1,0 +1,46 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+@import "../../../../scss/utils.scss";
+
+.kr-channel-card {
+  background-color: $kr-torquoise;
+  height: 100%;
+
+  .mat-mdc-card-content {
+    margin-bottom: $kr-space-base;
+  }
+  .mat-mdc-card-actions {
+    margin: auto 0 0 0;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .mat-divider {
+      width: 100%;
+      margin-bottom: $kr-space-small;
+    }
+  }
+
+  small span {
+    text-transform: uppercase;
+    text-decoration: underline;
+  }
+
+  img {
+    max-width: 30px;
+    max-height: 30px;
+    margin-left: $kr-space-medium;
+  }
+
+  &.clickable {
+    cursor: pointer;
+    transition: all 0.1s;
+
+    &:hover {
+      @extend .kr-shadow-4;
+    }
+    &.selected {
+      background-color: $kr-night;
+      color: white;
+    }
+  }
+}

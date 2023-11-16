@@ -1,0 +1,82 @@
+// COLORS
+.kr-text-grey { color: $kr-grey; }
+.kr-text-danger { color: $kr-danger; }
+.kr-background-night { background-color: $kr-night; }
+.kr-background-warn { background-color: $kr-warn; }
+
+
+// ELEVATIONS & SHADOWS
+.kr-shadow-1 { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+.kr-shadow-2 { box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); }
+.kr-shadow-3 { box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); }
+.kr-shadow-4 { box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); }
+.kr-shadow-5 { box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22); }
+
+
+// LAYOUT
+.kr-layout-center {
+  height: 65vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  flex-direction: column;
+}
+
+
+// SPACERS
+.kr-spacer-micro { height: $kr-space-micro; }
+.kr-spacer-small { height: $kr-space-small; }
+.kr-spacer-base { height: $kr-space-base; }
+.kr-spacer-medium { height: $kr-space-medium; }
+.kr-spacer-large { height: $kr-space-large; }
+
+
+// MARGINS
+
+.kr-mt-micro { margin-top: $kr-space-micro; }
+.kr-mt-small { margin-top: $kr-space-small; }
+.kr-mt-base { margin-top: $kr-space-base; }
+.kr-mt-medium { margin-top: $kr-space-medium; }
+.kr-mt-zero { margin-top: 0; }
+
+.kr-mb-micro { margin-bottom: $kr-space-micro; }
+.kr-mb-small { margin-bottom: $kr-space-small; }
+.kr-mb-base { margin-bottom: $kr-space-base; }
+.kr-mb-medium { margin-bottom: $kr-space-medium; }
+.kr-mb-zero { margin-bottom: 0; }
+
+.kr-ml-micro { margin-left: $kr-space-micro; }
+.kr-ml-small { margin-left: $kr-space-small; }
+.kr-ml-base { margin-left: $kr-space-base; }
+.kr-ml-medium { margin-left: $kr-space-medium; }
+.kr-ml-zero { margin-left: 0; }
+
+.kr-mr-micro { margin-right: $kr-space-micro; }
+.kr-mr-small { margin-right: $kr-space-small; }
+.kr-mr-base { margin-right: $kr-space-base; }
+.kr-mr-medium { margin-right: $kr-space-medium; }
+.kr-mr-zero { margin-right: 0; }
+
+
+
+// TEXT
+
+.kr-text-medium { font-size: $kr-text-medium !important; }
+
+.kr-text-primary { color: $kr-night; }
+.kr-text-secondary { color: $kr-yellow; }
+.kr-text-light { color: $kr-grey; }
+
+.kr-text-small { font-size: $kr-text-small; }
+.kr-text { font-size: $kr-text; }
+.kr-text-medium { font-size: $kr-text-medium; }
+.kr-text-large { font-size: $kr-text-large; }
+
+.kr-text-left { text-align: left !important; }
+.kr-text-center { text-align: center !important; }
+.kr-text-right { text-align: right !important; }
+
+// OVERRIDES
+// ...

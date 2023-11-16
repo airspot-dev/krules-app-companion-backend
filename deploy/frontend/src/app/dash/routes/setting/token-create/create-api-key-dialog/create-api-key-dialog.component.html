@@ -1,0 +1,28 @@
+<div class="kr-dialogs-content-wrapper">
+
+  <h3><i>{{data.apiKey.name}}</i> key created!</h3>
+  <p>Copy your API key and keep it in a safe place, such as a password manager or secret vault.</p>
+
+  <app-button-cliboard [buttonText]="data.apiKey.key" [text]="data.apiKey.key"></app-button-cliboard>
+
+  <div class="kr-spacer-large"></div>
+
+  <h4>How to use your new API Key</h4>
+  <p>
+    Use this snippet to test your API Key in client like Postman, the terminal or whatever you want.
+  </p>
+
+<pre class="kr-pre-code">
+curl -X 'POST' \
+'https://streams.krules.io/api/v1/0/to-remove/001' \
+-H 'accept: application/json' \
+-H 'api-key: {{data.apiKey.key}}' \
+-H 'Content-Type: application/json' \
+-d '&#123;"temp":25&#125;'
+</pre>
+
+</div>
+
+<mat-dialog-actions align="end" class="kr-dialogs-btn-wrapper">
+  <button (click)="dismiss()" mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

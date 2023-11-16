@@ -1,0 +1,187 @@
+html,
+body {
+
+  .mdc-menu-surface {
+    button {
+      font-family: "Roboto", sans-serif;
+      color: $kr-night;
+    }
+    .mat-icon {
+      color: $kr-night;
+    }
+    // IF FONTICONS IS USED IN MENU
+    i {
+      font-size: 18px;
+      width: 24px;
+      margin-right: 12px;
+    }
+  }
+
+  // OVERRIDES > TOGGLE
+  .mat-mdc-slide-toggle .mdc-form-field {
+    color: $kr-night;
+  }
+
+  // OVERRIDES > TOGGLE BUTTONS
+  .mat-button-toggle-group {
+    .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+      line-height: 30px;
+      padding: 0 8px;
+    }
+  }
+
+  // OVERRIDES > GROUP SELECTOR DISABLED
+  .mat-mdc-list-base .mdc-list-item.mdc-list-item--disabled,
+  .mat-mdc-list-base .mdc-list-item.mdc-list-item--non-interactive {
+    --mdc-list-list-item-focus-state-layer-color: transparent;
+  }
+
+  // OVERRIDES > TREE VIEW
+  .mat-tree {
+    .mat-mdc-icon-button.mat-mdc-button-base {
+      width: 30px;
+      height: 30px;
+      padding: 3px;
+      margin-right: 5px;
+    }
+    .mat-mdc-icon-button[disabled][disabled] {
+      display: none;
+    }
+    .mat-tree-node {
+      min-height: 36px;
+    }
+    .mat-mdc-radio-button .mdc-radio {
+      padding-left: 5px;
+    }
+  }
+
+  // OVERRIDES > BUTTONS
+  .mat-mdc-button.mat-unthemed {
+    --mdc-text-button-label-text-color: $kr-night;
+  }
+  .mat-mdc-outlined-button.mat-unthemed {
+    --mdc-outlined-button-label-text-color: $kr-night;
+  }
+  .mdc-button__label:not(.kr-evt-src-table-actions .mdc-button__label) {
+    font-family: "Roboto", sans-serif;
+    font-size: $kr-text;
+  }
+  .kr-btn-back .mdc-button__label {
+    font-size: $kr-text-small !important;
+  }
+
+  // OVERRIDES > INPUTS
+  .mdc-text-field {
+    padding: 0 8px;
+  }
+  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label {
+    color: $kr-night;
+  }
+  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: $kr-night;
+    caret-color: $kr-night;
+  }
+  .mdc-text-field--filled {
+    background-color: $kr-torquoise !important;
+  }
+
+  .kr-stepper-params-config-webhook {
+    .mat-mdc-form-field-subscript-wrapper { display: none; }
+  }
+
+
+  // OVERRIDES > SELECT
+  .mat-mdc-select-value,
+  .mdc-list-item__primary-text {
+    color: $kr-night;
+  }
+  // .mat-mdc-option.mat-mdc-option-active,
+  .mat-mdc-option.mdc-list-item--selected:not(.mat-mdc-option-multiple):not(
+      .mdc-list-item--disabled
+    ) {
+    background-color: $kr-night;
+
+    .mdc-list-item__primary-text {
+      color: white;
+    }
+  }
+
+  // OVERRIDES > MULTIPLE SELECT
+  .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-full {
+    background-color: $kr-night !important;
+  }
+
+  // OVERRIDES > SNACKBAR
+  .mat-mdc-snack-bar-container {
+    margin: $kr-space-large;
+    &.ok .mdc-snackbar__surface {
+      background-color: $kr-success;
+    }
+    &.error .mdc-snackbar__surface {
+      background-color: $kr-danger;
+    }
+    &.warn .mdc-snackbar__surface {
+      background-color: $kr-warn;
+    }
+  }
+
+  .kr-table-wrapper {
+    overflow: auto;
+    background: yellow;
+    width: 100%;
+    // max-height: 400px;
+  }
+
+  // OVERRIDES > TABS
+  .mat-mdc-tab:not(.mat-mdc-tab-disabled)
+    .mdc-tab-indicator__content--underline,
+  .mat-mdc-tab-link:not(.mat-mdc-tab-disabled)
+    .mdc-tab-indicator__content--underline {
+    border-color: $kr-coolgray-dark;
+  }
+
+  .mdc-tab-indicator__content {
+    opacity: 1;
+  }
+  .mdc-tab__text-label,
+  .mdc-tab__icon {
+    color: $kr-coolgray-dark !important;
+  }
+
+  .mdc-tab-indicator--active .mdc-tab-indicator__content {
+    border-color: $kr-night !important;
+  }
+
+  .mdc-tab--active {
+    .mdc-tab__text-label,
+    .mdc-tab__icon {
+      color: $kr-night !important;
+    }
+    .mat-mdc-tab-ripple {
+      background-color: $kr-torquoise;
+    }
+  }
+
+  // OVERRIDES > DIALOG PANES
+  .mat-mdc-dialog-container {
+    margin-top: -35vh;
+  }
+  .kr-dialogs-content-wrapper {
+    padding: $kr-space-medium;
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+  .kr-dialogs-btn-wrapper {
+    padding: 0 $kr-space-medium $kr-space-medium $kr-space-medium;
+  }
+
+  // OVERRIDES > STEPPER
+  .mat-step-header .mat-step-icon {
+    color: white;
+  }
+  .mat-step-header .mat-step-icon-selected {
+    color: $kr-night;
+  }
+}

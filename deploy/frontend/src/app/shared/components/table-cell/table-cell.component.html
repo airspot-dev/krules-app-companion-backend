@@ -1,0 +1,8 @@
+<div [title]="text">
+  <div class="kr-cell-content">
+    <span [innerHtml]="text" [class.changed]="highlight" [class.accent]="highlightAccent"></span>
+    <button class="kr-expand-btn" (click)="openDialog()" mat-icon-button>
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
+</div>

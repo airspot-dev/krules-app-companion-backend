@@ -1,0 +1,16 @@
+<svg width="183.2px" height="200px" viewBox="0 0 183.2 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Assets" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Pub/Sub-NEG" fill="#FFFFFF" fill-rule="nonzero">
+            <circle id="Oval" cx="161.3" cy="62.1" r="17.2"></circle>
+            <circle id="Oval" cx="21.9" cy="62.1" r="17.2"></circle>
+            <circle id="Oval" cx="91.6" cy="182.8" r="17.2"></circle>
+            <polygon id="Rectangle" transform="translate(142.4792, 130.6691) rotate(-60.1135) translate(-142.4792, -130.6691)" points="134.501806 108.169113 150.456567 108.169113 150.456567 153.169113 134.501806 153.169113"></polygon>
+            <polygon id="Rectangle" transform="translate(41.3951, 131.3653) rotate(-30) translate(-41.3951, -131.3653)" points="18.8951122 123.415319 63.8951122 123.415319 63.8951122 139.315319 18.8951122 139.315319"></polygon>
+            <rect id="Rectangle" x="83.6" y="21.9" width="15.9" height="45"></rect>
+            <circle id="Oval" cx="91.6" cy="102.3" r="27.8"></circle>
+            <circle id="Oval" cx="21.9" cy="142.5" r="21.9"></circle>
+            <circle id="Oval" cx="161.3" cy="142.5" r="21.9"></circle>
+            <circle id="Oval" cx="91.6" cy="21.9" r="21.9"></circle>
+        </g>
+    </g>
+</svg>

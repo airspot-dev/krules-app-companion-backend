@@ -1,0 +1,22 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+#form-brand-wrapper {
+  width: 350px;
+
+  .mat-mdc-form-field { width: 100%; }
+
+  button {
+    @extend .kr-text;
+    color: $kr-night;
+    border: 1px solid $kr-night;
+    width: 150px;
+  }
+}
+
+.mat-mdc-tab-group {
+ .mat-icon {
+    margin-right: $kr-space-micro;
+  }
+}

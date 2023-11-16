@@ -1,0 +1,12 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+@import "../../../../scss/utils.scss";
+
+:host {
+  display: flex;
+}
+.kr-snackbar-close-btn {
+  color: white;
+  cursor: pointer;
+  margin-right: 1rem;
+}

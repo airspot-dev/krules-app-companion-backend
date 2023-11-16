@@ -1,0 +1,11 @@
+# Stage 1
+FROM node:18.14.2 as node
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm install -g @angular/cli
+RUN ng build --configuration development --output-path /app/dist/site
+# Stage 2
+FROM nginx:alpine
+COPY --from=node /app/dist/site /usr/share/nginx/html
+ADD nginx-default.conf /etc/nginx/conf.d/default.conf

@@ -1,0 +1,21 @@
+<div class="kr-dialogs-content-wrapper">
+
+  <h3>How to use your API Key</h3>
+  <p>
+    Use this snippet to test your API Key in client like Postman, the terminal or whatever you want.
+  </p>
+
+<pre class="kr-pre-code">
+curl -X 'POST' \
+'https://streams.krules.io/api/v1/0/to-remove/001' \
+-H 'accept: application/json' \
+-H 'api-key: <i>[YOUR_API_KEY]</i>' \
+-H 'Content-Type: application/json' \
+-d '&#123;"temp":25&#125;'
+</pre>
+
+</div>
+
+<mat-dialog-actions align="end" class="kr-dialogs-btn-wrapper">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

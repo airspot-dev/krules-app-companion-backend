@@ -1,0 +1,106 @@
+html,
+body {
+  // TABLES ALL AROUND
+
+  .mat-mdc-table {
+    white-space: nowrap;
+
+    .mat-sort-header-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .mat-sort-header-container {
+      justify-content: center;
+    }
+
+    .mdc-data-table__header-cell {
+      color: $kr-night;
+      background-color: $kr-coolgray;
+      text-align: center;
+
+      small {
+        font-weight: normal;
+      }
+    }
+
+    .mdc-data-table__header-row {
+      height: 50px;
+    }
+    .mdc-data-table__row {
+      height: 60px;
+    }
+
+    .mdc-data-table__pagination-total,
+    .mdc-data-table__pagination-rows-per-page-label,
+    .mdc-data-table__cell {
+      color: $kr-night;
+      font-family: "Roboto Mono", monospace;
+      font-size: $kr-text-small;
+      //text-align: center;
+
+      &:last-of-type {
+        width: 1%;
+      }
+    }
+
+    .mat-column-id {
+      width: 1%;
+    }
+
+    .mat-column-_last_update {
+      width: 1%;
+      border-right: 1px solid $kr-night;
+
+      .mat-sort-header-container {
+        justify-content: flex-start;
+      }
+    }
+    .kr-id-title {
+      font-size: $kr-text;
+      font-weight: bold;
+    }
+    .kr-last-update {
+      color: $kr-grey;
+    }
+  }
+  .mat-mdc-paginator {
+    margin: $kr-space-base 0;
+  }
+
+  // EVENT SOURCING TABLE ONLY
+
+  .kr-table-evt-src {
+    .mat-mdc-form-field {
+      display: flex;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: auto;
+    }
+    .mat-mdc-form-field-flex,
+    .mat-mdc-text-field-wrapper {
+      height: 40px;
+    }
+    .mdc-text-field--no-label:not(.mdc-text-field--outlined):not(
+        .mdc-text-field--textarea
+      )
+      .mat-mdc-form-field-infix {
+      padding: 0;
+      margin: auto;
+      font-size: $kr-text;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+
+  // HOVERING CELLS - ONLY FOR NOT DRAGGABLE TABLES
+
+  table:not(.kr-table-draggable-row, .kr-api-table) {
+    .mat-mdc-cell:hover {
+      background-color: $kr-grey-extra-light;
+    }
+  }
+}

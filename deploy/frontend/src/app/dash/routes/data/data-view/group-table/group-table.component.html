@@ -1,0 +1,71 @@
+<div *ngIf="!group" class="kr-no-groups-wrapper">
+  <i class="fa-solid fa-arrow-right-arrow-left kr-mr-small"></i> <i>Select a group on the left to see attached data...</i>
+</div>
+
+<div class="kr-filter-container">
+  <app-key-value-filter [columns]="columns" (filter)="filterEvt($event)"></app-key-value-filter>
+</div>
+
+<div *ngIf="group && !dataSource.data.length" class="kr-no-data-msg">
+  <i class="fa-regular fa-face-frown"></i>&nbsp;<i>Sorry, no data to display!</i>
+</div>
+
+
+<div [hidden]="!(group && dataSource.data.length)" appTableFixed [isLoaded]="loaded" [isCollapsed]="_collapsed">
+  <table mat-table [dataSource]="dataSource" matSort>
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- <ng-container matColumnDef="id" sticky>
+      <th mat-header-cell style="width: auto" *matHeaderCellDef> ID </th>
+      <td mat-cell *matCellDef="let element">
+        {{element.id}}<br>
+      </td>
+    </ng-container> -->
+    <ng-container matColumnDef="_last_update" sticky>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        <div>Entity ID</div>
+        <small>Sort by last update</small>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <div class="kr-id-title">{{element.id}}</div>
+        <span class="kr-last-update" aria-label="last update">
+          {{convertDate(element) | date:'dd/MM/yy HH:mm:ss'}}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container [matColumnDef]="column.id" *ngFor="let column of columns; let i = index">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        <div>{{column.data().readable_name || column.id}}</div>
+        <small class="kr-text-monospace"><i>{{column.id}}</i></small>
+      </th>
+      <td mat-cell *matCellDef="let element" class="kr-text-center">
+        <app-table-cell [text]="element.data()[column.id]"></app-table-cell>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions" stickyEnd>
+      <th mat-header-cell class="group-action" *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let element">
+        <div *ngIf="!isDeleting(element)">
+          <button mat-icon-button [routerLink]="getLink(element.id)">
+            <mat-icon>search</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteEntity(element.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnIds;"></tr>
+    <tr mat-row [id]="row.id" [class.kr-is-deleting]="isDeleting(row)" *matRowDef="let row; columns: columnIds;"></tr>
+  </table>
+
+</div>
+
+<div [hidden]="!(group && dataSource.data.length)">
+  <mat-paginator [length]="resultsLength" [pageSize]="itemsPerPage" [pageSizeOptions]="elementPerPage"></mat-paginator>
+</div>

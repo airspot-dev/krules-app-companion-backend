@@ -1,0 +1,52 @@
+@import "../../../../scss/vars.scss";
+@import "../../../../scss/brand.scss";
+@import "../../../../scss/utils.scss";
+
+.kr-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  & > span {
+    margin-left: auto;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mat-mdc-icon-button.mat-mdc-button-base {
+    width: 30px;
+    height: 30px;
+    padding: 3px;
+    margin-right: auto;
+  }
+  &:hover {
+    .kr-expand-btn {
+      opacity: 100%;
+    }
+  }
+  .kr-expand-btn {
+    opacity: 0;
+    -webkit-transition: opacity 0.15s ease-in-out;
+    -moz-transition: opacity 0.15s ease-in-out;
+    -ms-transition: opacity 0.15s ease-in-out;
+    -o-transition: opacity 0.15s ease-in-out;
+    transition: opacity 0.15s ease-in-out;
+  }
+}
+
+.changed {
+  background-color: $kr-yellow-light;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-block;
+
+  &.accent {
+    background-color: $kr-danger-light;
+  }
+}

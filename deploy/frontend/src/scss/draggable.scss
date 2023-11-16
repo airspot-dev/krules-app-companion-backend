@@ -1,0 +1,46 @@
+html,
+body {
+
+  .kr-table-draggable-row {
+
+    .mat-mdc-row:hover {
+      background-color: $kr-grey-extra-light;
+    }
+
+    .mat-mdc-cell:first-of-type {
+      cursor: grab;
+      width: 1%;
+    }
+
+    .fa-grip-vertical {
+      color: $kr-coolgray-dark;
+      margin-left: -5px;
+    }
+
+    .kr-grip-column {
+      font-size: $kr-text-medium !important;
+    }
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0;
+  }
+
+  .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  .drag-preview {
+    padding: 1rem;
+    box-sizing: border-box;
+    background-color: $kr-coolgray;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  }
+
+}

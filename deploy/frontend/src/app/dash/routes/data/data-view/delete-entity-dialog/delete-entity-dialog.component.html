@@ -1,0 +1,20 @@
+<div class="kr-dialogs-content-wrapper">
+
+  <h3>Deleting <i>{{data.entityId}}</i></h3>
+  <p>Are you sure you want to delete this entity?</p>
+
+  <div class="kr-spacer-base"></div>
+
+  <mat-form-field class="full-width">
+    <mat-label>Type entity ID to confirm its deletion</mat-label>
+    <input type="text" [(ngModel)]="entityConfirm" matInput>
+  </mat-form-field>
+  <div class="kr-spacer-micro"></div>
+  <small class="kr-text-danger">NOTE: deletion could take many hours, depending on the size of data stored!</small>
+
+</div>
+
+<mat-dialog-actions align="end" class="kr-dialogs-btn-wrapper">
+  <button color="warn" (click)="deleteEntity()" cdkFocusInitial [disabled]="entityConfirm!=data.entityId" mat-raised-button mat-dialog-close>Delete {{data.entityId}}</button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

@@ -1,0 +1,85 @@
+<div class="kr-generic-container" id="kr-table">
+
+  <h2><i class="fa-solid fa-bolt"></i> Create a new Trigger</h2>
+  <p>Receive a notification or manipulate data when something happens</p>
+
+  <div class="kr-spacer-large"></div>
+
+  <form>
+    <p><b>1. Give your trigger a friendly name</b></p>
+
+    <div class="kr-automation-inputs-wrapper">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input name="name" type="text" matInput placeholder="Eg. Pub/Sub redirect" [(ngModel)]="automation.name" required>
+
+
+      </mat-form-field>
+    </div>
+
+    <div class="kr-spacer-medium"></div>
+
+
+    <p><b>2. Select channels where to output data</b></p>
+
+    <div class="kr-channel-card-container">
+      <div class="kr-channel-card-container-empty" *ngIf="!channels.length">
+        <p>There isn't any Channel?<br>Start by creating a new one!</p>
+        <div class="kr-spacer-base"></div>
+        <button mat-stroked-button routerLink="/channel/create">Create Channel<mat-icon matPrefix>add</mat-icon></button>
+      </div>
+      <app-channel-card class="kr-channel-card-component" [isClickable]="true" [isSelected]="automation.channels.includes(channel.id)" (click)="selectChannel(channel.id)" [small]="true" [channel]="channel" *ngFor="let channel of channels"></app-channel-card>
+    </div>
+    <p class="kr-mt-base" *ngIf="channels.length"><i>Do you need a different Channel? <a routerLink="/channel/create">Create it now</a>!</i></p>
+
+    <div class="kr-spacer-large"></div>
+    <p><b>3. Select the event that triggers the notification</b></p>
+
+    <div class="kr-automation-inputs-wrapper kr-automation-inputs-wrapper-flex">
+      <mat-form-field appearance="fill">
+        <mat-label>Event type</mat-label>
+        <mat-select [(ngModel)]="automation.event" name="event" required multiple>
+          <mat-option value="onEntityCreated">onEntityCreated</mat-option>
+          <mat-option value="onEntityUpdated">onEntityUpdated</mat-option>
+          <mat-option value="onEntityDeleted">onEntityDeleted</mat-option>
+          <mat-option value="onGroupCreated">onGroupCreated</mat-option>
+          <mat-option value="onGroupDeleted">onGroupDeleted</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill" *ngIf="automation.event.includes('onEntityUpdated')">
+        <mat-label>Entity fields</mat-label>
+        <input name="entityFields" [(ngModel)]="automation.entityFieldsRaw" type="text" placeholder="Comma separated entity fields" matInput>
+      </mat-form-field>
+    </div>
+
+    <div class="kr-spacer-medium"></div>
+    <p class="kr-mb-zero"><b>4. Filter groups with a match rule</b></p>
+    <p><i>Wildcard is allowed.</i></p>
+
+    <div class="kr-suggestion-container kr-mb-base">
+      <button [innerHtml]="groupMatchSuggestion.icon" mat-stroked-button (click)="setGroupMatchSuggestionToken(groupMatchSuggestion.value)" *ngFor="let groupMatchSuggestion of groupMatchSuggestions" class="kr-mr-micro"></button>
+    </div>
+
+    <div class="kr-automation-inputs-wrapper">
+      <mat-form-field appearance="fill">
+        <mat-label>Group match</mat-label>
+        <input name="groupMatch" (ngModelChange)="groupMatchChange($event)" [(ngModel)]="automation.groupMatch" type="text" placeholder="Complete by using above suggestions" matInput required>
+      </mat-form-field>
+      <button mat-icon-button class="kr-ml-base" (click)="resetGroupMatch()">
+        <mat-icon matPrefix>clear</mat-icon>
+      </button>
+    </div>
+
+    <div class="kr-spacer-medium"></div>
+    <button mat-stroked-button [disabled]="isDisabled()" (click)="submit()">
+      <span *ngIf="isUpdating">Update trigger</span>
+      <span *ngIf="!isUpdating">Create trigger</span>
+      <mat-icon *ngIf="isUpdating" matPrefix>save</mat-icon>
+      <mat-icon *ngIf="!isUpdating" matPrefix>add</mat-icon>
+    </button>
+    <button class="kr-ml-base" color="warn" mat-stroked-button routerLink="/automation/list">
+      <mat-icon matPrefix>close</mat-icon> Cancel
+    </button>
+  </form>
+
+</div>

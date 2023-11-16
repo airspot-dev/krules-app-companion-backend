@@ -1,0 +1,60 @@
+<mat-toolbar>
+
+  <a id="logo" href="data/view">
+    <img [src]="brandLogoUrl" />
+    <span>{{brandName}}</span>
+  </a>
+
+  <div class="kr-menu-btn-wrapper">
+
+    <button mat-button *ngFor="let item of menuItems" [routerLink]="item.route">
+      <i class="fa-solid fa-{{item.icon}} kr-mr-micro"></i> {{item.name}}
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menu">
+      <i class="fa-solid fa-circle-user kr-mr-micro"></i> Account
+    </button>
+
+    <div class="kr-menu-divider"></div>
+
+    <button *ngIf="!!subscriptions.length" class=" kr-text-left" mat-button [matMenuTriggerFor]="menuProjects">
+      <i class="fa-solid fa-ellipsis-vertical kr-mr-micro"></i> {{activeSubscription}}
+    </button>
+
+    <!-- USER MENU -->
+    <mat-menu #menu="matMenu">
+
+      <button mat-menu-item routerLink="setting" [queryParams]="{tab: 0}">
+        <mat-icon>public</mat-icon> Global settings
+      </button>
+      <button mat-menu-item routerLink="setting" [queryParams]="{tab: 1}">
+        <mat-icon>person</mat-icon> User settings
+      </button>
+      <button mat-menu-item routerLink="setting/token/list">
+        <i class="fa-solid fa-key"></i> API Keys
+      </button>
+
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+
+      <!-- <div mat-menu-item>
+        <mat-icon>nights_stay</mat-icon>Dark Mode <mat-slide-toggle></mat-slide-toggle>
+      </div> -->
+    </mat-menu>
+
+    <!-- PROJECTS MENU -->
+    <mat-menu #menuProjects="matMenu" class="kr-project-menu">
+      <div class="kr-submenu-title">
+        <h4>Projects</h4>
+      </div>
+      <button mat-menu-item (click)="changeProject(subscription)" *ngFor="let subscription of subscriptions">
+        <span *ngIf="activeSubscription != subscription">{{subscription}}</span>
+        <strong *ngIf="activeSubscription == subscription">{{subscription}}</strong>
+      </button>
+
+    </mat-menu>
+
+  </div>
+
+</mat-toolbar>

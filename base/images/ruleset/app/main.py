@@ -19,7 +19,6 @@ import logging
 
 logger = logging.getLogger(__file__)
 
-
 # install_fastapi_cloudevents(app)
 
 krules_env.init()
@@ -36,6 +35,7 @@ app = KrulesApp()
 
 try:
     from routers import routers
+
     for router in routers:
         app.include_router(router)
 except ImportError:
@@ -43,12 +43,18 @@ except ImportError:
 
 try:
     from middlewares import middlewares
+
     for cls, kwargs in middlewares:
         app.add_middleware(cls, **kwargs)
 except ImportError:
     logger.warning("No app middleware defined!")
 
 event_router = event_router_factory()
+
+
+@app.get("/")
+async def get_root(request: Request, response: Response):
+    response.status_code = status.HTTP_200_OK
 
 
 @app.post("/")
@@ -58,7 +64,8 @@ async def main(request: Request, response: Response):
         dispatch_policy = os.environ.get("DISPATCH_POLICY", DispatchPolicyConst.NEVER)
 
         m = marshaller.NewDefaultHTTPMarshaller()
-        event = m.FromRequest(v1.Event(), request.headers, io.BytesIO(json.dumps(await request.json()).encode()), lambda x: json.load(x))
+        event = m.FromRequest(v1.Event(), request.headers, io.BytesIO(json.dumps(await request.json()).encode()),
+                              lambda x: json.load(x))
         event_info = event.Properties()
         event_info.update(event_info.pop("extensions", {}))
         event_data = event_info.pop("data")
@@ -81,7 +88,7 @@ async def main(request: Request, response: Response):
             try:
                 data = json.loads(decoded_data)
                 if isinstance(data, dict):
-                    if "attributes" in event_data["message"]: # and "ce-type" in event_data["message"]["attributes"]:
+                    if "attributes" in event_data["message"]:  # and "ce-type" in event_data["message"]["attributes"]:
                         event_info = event_data["message"]["attributes"]
                         subject = event_info.get("subject", subject)
                         event_type = event_info.get("type")

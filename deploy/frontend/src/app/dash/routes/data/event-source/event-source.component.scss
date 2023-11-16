@@ -1,0 +1,27 @@
+@import "../../../../../scss/vars.scss";
+@import "../../../../../scss/brand.scss";
+@import "../../../../../scss/utils.scss";
+
+.mat-column-id {
+  width: 1%;
+}
+
+.mat-column-datetime {
+  width: 155px;
+  padding-right: 24px;
+  text-align: left;
+}
+
+.kr-column-right-border {
+  border-right: 1px solid $kr-night;
+}
+
+.kr-evt-src-table-actions {
+  width: 1%;
+  button {
+    margin: 0 $kr-space-micro;
+    height: 24px;
+    color: white;
+    background-color: $kr-yellow;
+  }
+}
