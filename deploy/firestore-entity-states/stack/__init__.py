@@ -33,6 +33,16 @@ topic_ingestion = gcp.pubsub.Topic.get(
     )
 )
 
+topic_procevents = gcp.pubsub.Topic.get(
+    "procevents",
+    base_stack_ref.get_output(
+        "topics"
+    ).apply(
+        lambda topics: topics.get("procevents").get("id")
+    )
+)
+
+
 access_secrets = []
 envs = []
 
@@ -66,6 +76,7 @@ deployment = GkeDeployment(
     ],
     publish_to={
         "ingestion": topic_ingestion,
+        "procevents": topic_procevents,
     },
     use_firestore=True,
 )

@@ -14,7 +14,8 @@ sane_utils.google.make_enable_apis_recipe(
         "secretmanager",
         "pubsub",
         "run",
-        "firestore"
+        "firestore",
+        "eventarc",
     ]
 )
 

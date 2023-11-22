@@ -22,7 +22,7 @@ from firebase_admin import credentials, auth
 #cred = credentials.Certificate("firebasesa.json")
 #firebase_admin.initialize_app(cred)
 firebase_admin.initialize_app()
-uid = "clOKBxMPv2Tm1OYTTBxneY4A8f42"
+uid = "OFrn1tkdj9MI9GbHt0NkQDpipUq1"
 # user = auth.get_user(uid)
 auth.set_custom_user_claims(
     uid,

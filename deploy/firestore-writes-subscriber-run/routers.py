@@ -60,7 +60,6 @@ def map_value_to_plain_dict(obj):
 
 
 def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1):
-
     collection_value = SystemEventsV1.ENTITY_DELETED and payload.old_value or payload.value
     collection = collection_value.name.replace(DOCS_PATH, "")
     match = collection_regex.match(collection)
@@ -69,7 +68,11 @@ def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1
         if "_deleting" in changed_properties and event_type == SystemEventsV1.ENTITY_UPDATED:
             # entity has been changed just because marked for deleting
             return
+        state = map_value_to_plain_dict(payload.value)
+        old_state = map_value_to_plain_dict(payload.old_value)
         changed_properties = [el for el in changed_properties if not el.startswith("_")]
+        if event_type == SystemEventsV1.ENTITY_CREATED:
+            changed_properties = list(state.keys())
         collection_info = match.groupdict()
         subscription = collection_info["subscription"]
         group = collection_info["group"]
@@ -77,14 +80,14 @@ def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1
             return
         entity_id = collection_info["entity_id"]
         subject = subject_factory(f'entity|{subscription}|{group}|{entity_id}')
-        payload=dict(
-                subscription=subscription,
-                group=group,
-                entity_id=entity_id,
-                changed_properties=changed_properties,
-                state=map_value_to_plain_dict(payload.value),
-                old_state=map_value_to_plain_dict(payload.old_value),
-            )
+        payload = dict(
+            subscription=subscription,
+            group=group,
+            entity_id=entity_id,
+            changed_properties=changed_properties,
+            state=state,
+            old_state=old_state,
+        )
         event_router.route(
             event_type,
             subject=subject,
@@ -114,6 +117,7 @@ async def document_deleted(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
     _process_entity_event(payload, SystemEventsV1.ENTITY_DELETED)
+
 
 # @entities_router.post("/written")
 # async def document_written(request: Request):

@@ -14,6 +14,7 @@ from common.event_types import IngestionEventsV1
 # firebase_admin.initialize_app(cred)
 firebase_admin.initialize_app()
 
+INGESTION_TOPIC = os.environ["INGESTION_TOPIC"]
 
 def get_readable_name(name):
     return name.replace("-", " ").replace("_", " ").replace(".", " ").replace(":", " ").replace("|", " ").capitalize()
@@ -107,7 +108,8 @@ class RouteSubjectPropertiesData(ProcessingFunction):
                 payload={
                     "data": data
                 },
-                dispatch_policy=DispatchPolicyConst.DIRECT
+                dispatch_policy=DispatchPolicyConst.DIRECT,
+                topic=INGESTION_TOPIC,
             )
 
 

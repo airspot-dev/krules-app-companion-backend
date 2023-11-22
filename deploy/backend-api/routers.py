@@ -176,7 +176,7 @@ async def delete_entity(subscription, group, entity_id: str, token: APIKey = Dep
 
 
 @router.post("/{subscription}/{group}")
-async def ingestion_data(subscription, group, body: GroupUpdatePayload, api_key: APIKey = Depends(get_api_key)):
+async def ingestion_data_multi(subscription, group, body: GroupUpdatePayload, api_key: APIKey = Depends(get_api_key)):
     # data = await request.json()
     if body.entities_filter is None:
         body.entities_filter = []

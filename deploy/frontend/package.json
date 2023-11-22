@@ -30,7 +30,7 @@
     "@ngneat/overview": "^3.0.0",
     "@types/nanoid": "^3.0.0",
     "@vscode/codicons": "^0.0.32",
-    "firebase": "^10.6.0",
+    "firebase": "^9.8.0",
     "firebase-tools": "^11.24.1",
     "monaco-editor": "^0.34.1",
     "nanoid": "^4.0.2",
