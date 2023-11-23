@@ -34,7 +34,7 @@ def get_value(obj):
 
 def map_value_to_plain_dict(obj):
     plain_dict = {}
-    for k, v in obj["fields"].items():
+    for k, v in obj.get("fields", {}).items():
         plain_dict[k] = get_value(v)
     return plain_dict
 
@@ -86,16 +86,23 @@ def index(data, context):
     collection = context.resource.replace(docs_path, "")
     match = collection_regex.match(collection)
     collection_info = match.groupdict()
-    update_mask = data.get("updateMask", {}).get("fieldPaths", [])
+    print("@@@@@@@@@@@@")
+    print(data)
+    value = map_value_to_plain_dict(data["value"])
+    print(f">>> VALUE: {value}")
+    if len(data["oldValue"]):
+        update_mask = data.get("updateMask", {}).get("fieldPaths", [])
+    else:
+        update_mask = [k for k in value.keys() if not k.startswith("_")]
     if "_last_update" in update_mask:
         update_mask.remove("_last_update")
     handle_group(
         subscription=collection_info["subscription"],
         group=collection_info["group"],
         entity_id=collection_info["entity_id"],
-        value=map_value_to_plain_dict(data["value"]),
+        value=value,
         old_value=map_value_to_plain_dict(data["oldValue"]),
-        update_mask=update_mask
+        update_mask=update_mask,
     )
 
 
@@ -133,6 +140,7 @@ def handle_group(subscription, group, entity_id, value, old_value, update_mask):
                 }
             )
     elif subscription == "2" and group == "coldchain.locations":
+        print(f">>>> UPDATE MASK: {update_mask}")
         route(
             topic=os.environ["COLDCHAIN_LOCATIONS_TOPIC"],
             event_type="entity-state-changed",
