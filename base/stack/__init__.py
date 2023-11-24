@@ -1,5 +1,6 @@
 import pulumi
 import pulumi_kubernetes as kubernetes
+import pulumi_gcp as gcp
 
 from krules_dev import sane_utils
 from krules_dev.sane_utils.pulumi.components import (
@@ -23,7 +24,6 @@ docker_registry = ArtifactRegistry(
     "docker-registry",
 )
 pulumi.export("docker-repository", docker_registry.repository)
-pulumi.export("docker-cluster-artifact-iam-member", docker_registry.cluster_iam_member)
 
 namespace = kubernetes.core.v1.Namespace(
     "gke-namespace",
@@ -41,23 +41,156 @@ ruleset_base_image = SaneDockerImage(
 
 pulumi.export("ruleset-image-base", ruleset_base_image.image)
 
-# firestore = FirestoreDB(
-#     "firestore",
-#     firestore_dbname=sane_utils.name_resource(sane_utils.check_env("project_name"))
-# )
-#
-# pulumi.export("firestore", firestore.db)
+gcp.firestore.Index(
+    "firestore_idx_entity_asc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="data",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="entity_id",
+            order="ASCENDING"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="ASCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="ASCENDING",
+        )
+    ]
+)
 
-# {
-#   "app_engine_integration_mode": "DISABLED",
-#   "concurrency_mode": "PESSIMISTIC",
-#   "create_time": "",
-#   "etag": "IIn5tqbgpYIDMLrqgabgpYID",
-#   "id": "projects/companion-lab/databases/companion",
-#   "key_prefix": "",
-#   "location_id": "europe-west4",
-#   "name": "companion",
-#   "project": "companion-lab",
-#   "type": "FIRESTORE_NATIVE",
-#   "urn": "urn:pulumi:base-dev0::companion::sane:FirestoreDB$gcp:firestore/database:Database::firestore"
-# }
+gcp.firestore.Index(
+    "firestore_idx_entity_desc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="data",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="entity_id",
+            order="DESCENDING"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="DESCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="DESCENDING",
+        )
+    ]
+)
+
+gcp.firestore.Index(
+    "firestore_idx_eventsource_entity_asc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="event_sourcing",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="entity_id",
+            order="ASCENDING"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="ASCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="ASCENDING",
+        )
+    ]
+)
+
+gcp.firestore.Index(
+    "firestore_idx_eventsource_entity_desc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="event_sourcing",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="entity_id",
+            order="DESCENDING"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="DESCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="DESCENDING",
+        )
+    ]
+)
+
+gcp.firestore.Index(
+    "firestore_idx_eventsource_props_asc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="event_sourcing",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="changed_properties",
+            array_config="CONTAINS"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="ASCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="ASCENDING",
+        )
+    ]
+)
+
+gcp.firestore.Index(
+    "firestore_idx_eventsource_props_desc",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="event_sourcing",
+    query_scope="COLLECTION_GROUP",
+    fields=[
+        gcp.firestore.IndexFieldArgs(
+            field_path="changed_properties",
+            array_config="CONTAINS"
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="datetime",
+            order="DESCENDING",
+        ),
+        gcp.firestore.IndexFieldArgs(
+            field_path="__name__",
+            order="DESCENDING",
+        )
+    ]
+)
+
+
+# TODO: not working (rules not updated) !!!!
+firestore_rules = """\
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth.uid != null;
+    }
+  }
+}
+"""
+
+gcp.firebaserules.Ruleset(
+    "firestore_rules",
+    project=sane_utils.get_firestore_project_id(),
+    source=gcp.firebaserules.RulesetSourceArgs(
+        files=[gcp.firebaserules.RulesetSourceFileArgs(
+            content=firestore_rules,
+            name="firestore.rules",
+        )],
+    ))
