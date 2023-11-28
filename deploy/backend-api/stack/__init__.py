@@ -39,9 +39,9 @@ deployment = GkeDeployment(
     gcp_repository=gcp_repository,
     access_secrets=[
         "ingestion_api_key",
-        "celery_broker",
-        "celery_results_backend",
-        "subjects_redis_url",
+        #"celery_broker",
+        #"celery_results_backend",
+        #"subjects_redis_url",
     ],
     publish_to={
         "ingestion": topic_ingestion,
