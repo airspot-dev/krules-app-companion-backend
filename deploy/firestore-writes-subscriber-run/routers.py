@@ -15,19 +15,26 @@ logger = logging.getLogger()
 
 collection_regex = re.compile("^(?P<subscription>.+)[/]groups[/](?P<group>.+)[/](?P<entity_id>.+)$")
 schema_regex = re.compile("^(?P<subscription>.+)[/]settings[/]schemas[/](?P<group>.+)$")
+channel_regex = re.compile("^(?P<subscription>.+)[/]settings[/]channels[/](?P<channel_id>.+)$")
 
 # firebase_admin.initialize_app()
 # db = firestore_client.client()
 
 entities_router = KRulesAPIRouter(
     prefix="/entities",
-    tags=["firestore-entitiy-updates"],
+    tags=["firestore-entity-updates"],
     responses={404: {"description": "Not found"}},
 )
 
 schemas_router = KRulesAPIRouter(
     prefix="/schemas",
-    tags=["firestore-schema-updates"],
+    tags=["firestore-schemas-updates"],
+    responses={404: {"description": "Not found"}},
+)
+
+channels_router = KRulesAPIRouter(
+    prefix="/channels",
+    tags=["firestore-channels-updates"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -98,60 +105,86 @@ def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1
         )
 
 
-@entities_router.post("/created")
-async def document_created(request: Request):
+@entities_router.post("")
+async def entity_written(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
-    _process_entity_event(payload, SystemEventsV1.ENTITY_CREATED)
-
-
-@entities_router.post("/updated")
-async def document_updated(request: Request):
-    raw_pb = await request.body()
-    payload = firestore.DocumentEventData.deserialize(raw_pb)
-    _process_entity_event(payload, SystemEventsV1.ENTITY_UPDATED)
-
-
-@entities_router.post("/deleted")
-async def document_deleted(request: Request):
-    raw_pb = await request.body()
-    payload = firestore.DocumentEventData.deserialize(raw_pb)
-    _process_entity_event(payload, SystemEventsV1.ENTITY_DELETED)
-
-
-# @entities_router.post("/written")
-# async def document_written(request: Request):
-#     raw_pb = await request.body()
-#     payload = firestore.DocumentEventData.deserialize(raw_pb)
-#     print(str(request.values()))
-#     print(str(request.items()))
-#     print(str(payload).replace("\n", " "))
+    event_type = SystemEventsV1.ENTITY_UPDATED
+    if not bool(payload.old_value):
+        event_type = SystemEventsV1.ENTITY_CREATED
+    elif not bool(payload.value):
+        event_type = SystemEventsV1.ENTITY_DELETED
+    _process_entity_event(payload, event_type)
 
 
 @schemas_router.post("")
-async def schema_updates(request: Request):
+async def schema_written(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
+    print(payload)
     collection = payload.value.name.replace(DOCS_PATH, "")
     match = schema_regex.match(collection)
+    if match is None:
+        print(">>>>>>>>>>>>>>>>> MATCH 1")
+        collection = payload.old_value.name.replace(DOCS_PATH, "")
+        match = schema_regex.match(collection)
     if match is not None:
+        print(">>>>>>>>>>>>>>>>> MATCH 2")
+        event_type = SystemEventsV1.SCHEMA_UPDATED
+        if not bool(payload.old_value):
+            event_type = SystemEventsV1.SCHEMA_CREATED
+        elif not bool(payload.value):
+            event_type = SystemEventsV1.SCHEMA_DELETED
         group_info = match.groupdict()
         subscription = group_info["subscription"]
         group = group_info["group"]
         subject = subject_factory(f'schema|{subscription}|{group}')
-        settings = map_value_to_plain_dict(payload.value)
+        v_payload = {}
+        if event_type in (SystemEventsV1.SCHEMA_CREATED, SystemEventsV1.SCHEMA_UPDATED):
+            v_payload = map_value_to_plain_dict(payload.value)
+        elif event_type == SystemEventsV1.SCHEMA_DELETED:
+            v_payload = map_value_to_plain_dict(payload.old_value)
         event_router.route(
-            SystemEventsV1.SCHEMA_UPDATED,
+            event_type=event_type,
             subject=subject,
-            payload=settings,
+            payload=v_payload,
             topic=os.environ["SETTINGS_TOPIC"],
             subscription=subscription,
             group=group
         )
 
-        # ttl = settings.get("ttl", None)
-        # if ttl:
-        #     subject.set("ttl", ttl, muted=True)
+
+@channels_router.post("")
+async def channel_written(request: Request):
+    raw_pb = await request.body()
+    payload = firestore.DocumentEventData.deserialize(raw_pb)
+    collection = payload.value.name.replace(DOCS_PATH, "")
+    match = channel_regex.match(collection)
+    if not match:
+        collection = payload.old_value.name.replace(DOCS_PATH, "")
+        match = channel_regex.match(collection)
+    if match:
+        event_type = SystemEventsV1.CHANNEL_UPDATED
+        if not bool(payload.old_value):
+            event_type = SystemEventsV1.CHANNEL_CREATED
+        elif not bool(payload.value):
+            event_type = SystemEventsV1.CHANNEL_DELETED
+        group_info = match.groupdict()
+        subscription = group_info["subscription"]
+        channel_id = group_info["channel_id"]
+        subject = subject_factory(f'channel|{subscription}|{channel_id}')
+        v_payload = {}
+        if event_type in (SystemEventsV1.CHANNEL_CREATED, SystemEventsV1.CHANNEL_UPDATED):
+            v_payload = map_value_to_plain_dict(payload.value)
+        elif event_type == SystemEventsV1.CHANNEL_DELETED:
+            v_payload = map_value_to_plain_dict(payload.old_value)
+        event_router.route(
+            event_type=event_type,
+            subject=subject,
+            payload=v_payload,
+            topic=os.environ["SETTINGS_TOPIC"],
+            subscription=subscription,
+        )
 
 
-routers = [entities_router, schemas_router]
+routers = [entities_router, schemas_router, channels_router]

@@ -9,7 +9,7 @@ from firestore import WriteDocument, WriteGroupColumns, RouteSubjectPropertiesDa
     UpdateDocument
 
 
-class UpdateGroupColumns(ProcessingFunction):
+class SubjectSchemaUpdateGroupColumns(ProcessingFunction):
 
     def execute(self, subscription, group, current_state):
         subject = subject_factory(f'schema|{subscription}|{group}', use_cache_default=False)
@@ -59,7 +59,7 @@ rulesdata: List[Rule] = [
                 data=lambda payload: payload["data"],
                 track_last_update=True
             ),
-            UpdateGroupColumns(
+            SubjectSchemaUpdateGroupColumns(
                 subscription=lambda payload: payload["entity_base_info"]["subscription"],
                 group=lambda payload: payload["entity_base_info"]["group"],
                 current_state=lambda payload: payload["data"],

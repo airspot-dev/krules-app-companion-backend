@@ -19,7 +19,7 @@ sane_utils.make_prepare_build_context_recipes(
         "common"
     ],
     sources=[
-        #"ruleset_functions",
+        "ruleset_functions",
         "ruleset.py"
     ],
 )

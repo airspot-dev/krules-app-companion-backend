@@ -52,65 +52,29 @@ service = CloudRun(
         "settings": topic_settings,
     },
     subscribe_to={
-        "firestore-trigger-created": dict(
+        "firestore-entity-changes": dict(
             matching_criterias=[
                 dict(
-                    attribute="type",
-                    value="google.cloud.firestore.document.v1.created",
-                ),
-                dict(
-                    attribute="database",
-                    value=sane_utils.get_firestore_database(),
-                ),
-                dict(
-                    attribute="document",
-                    operator="match-path-pattern",
-                    value="{subscription=*}/groups/{group=*}/{document=*}"
-                ),
-            ],
-            path="/entities/created"
-        ),
-        "firestore-trigger-updated": dict(
-            matching_criterias=[
-                dict(
-                    attribute="type",
-                    value="google.cloud.firestore.document.v1.updated",
-                ),
-                dict(
-                    attribute="database",
-                    value=sane_utils.get_firestore_database(),
-                ),
-                dict(
-                    attribute="document",
-                    operator="match-path-pattern",
-                    value="{subscription=*}/groups/{group=*}/{document=*}"
-                ),
-            ],
-            path="/entities/updated"
-        ),
-        "firestore-trigger-deleted": dict(
-            matching_criterias=[
-                dict(
-                    attribute="type",
-                    value="google.cloud.firestore.document.v1.deleted",
-                ),
-                dict(
-                    attribute="database",
-                    value=sane_utils.get_firestore_database(),
-                ),
-                dict(
-                    attribute="document",
-                    operator="match-path-pattern",
-                    value="{subscription=*}/groups/{group=*}/{document=*}"
-                ),
 
+                    attribute="type",
+                    value="google.cloud.firestore.document.v1.written",
+                ),
+                dict(
+                    attribute="database",
+                    value=sane_utils.get_firestore_database(),
+                ),
+                dict(
+                    attribute="document",
+                    operator="match-path-pattern",
+                    value="{subscription=*}/groups/{group=*}/{document=*}"
+                ),
             ],
-            path="/entities/deleted"
+            path="/entities"
+
         ),
         "firestore-schema-changes": dict(
             matching_criterias=[
                 dict(
-
                     attribute="type",
                     value="google.cloud.firestore.document.v1.written",
                 ),
@@ -125,6 +89,25 @@ service = CloudRun(
                 ),
             ],
             path="/schemas"
+        ),
+        "firestore-channel-changes": dict(
+            matching_criterias=[
+                dict(
+
+                    attribute="type",
+                    value="google.cloud.firestore.document.v1.written",
+                ),
+                dict(
+                    attribute="database",
+                    value=sane_utils.get_firestore_database(),
+                ),
+                dict(
+                    attribute="document",
+                    operator="match-path-pattern",
+                    value="{subscription=*}/settings/channels/{document=*}"
+                ),
+            ],
+            path="/channels"
         )
 
     },
@@ -141,23 +124,3 @@ service = CloudRun(
 pulumi.export("trigger", service.triggers)
 
 
-# eventarc_firestore_trigger_written = gcp.eventarc.Trigger(
-#     "eventarc-firestore-trigger-written",
-#     matching_criterias=[
-#         gcp.eventarc.TriggerMatchingCriteriaArgs(
-#             attribute="type",
-#             value="google.cloud.firestore.document.v1.written",
-#         ),
-#         gcp.eventarc.TriggerMatchingCriteriaArgs(
-#             attribute="database",
-#             value=sane_utils.get_firestore_database(),
-#         ),
-#     ],
-#     event_data_content_type="application/protobuf",
-#     destination=gcp.eventarc.TriggerDestinationArgs(
-#         cloud_run_service=TriggerDestinationCloudRunServiceArgs(
-#             service=service.service.name,
-#             path="/written",
-#         ),
-#     )
-# )
