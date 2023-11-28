@@ -72,7 +72,7 @@ gcp.firestore.Index(
     fields=[
         gcp.firestore.IndexFieldArgs(
             field_path="entity_id",
-            order="DESCENDING"
+            order="ASCENDING"
         ),
         gcp.firestore.IndexFieldArgs(
             field_path="datetime",
@@ -116,7 +116,7 @@ gcp.firestore.Index(
     fields=[
         gcp.firestore.IndexFieldArgs(
             field_path="entity_id",
-            order="DESCENDING"
+            order="ASCENDING"
         ),
         gcp.firestore.IndexFieldArgs(
             field_path="datetime",
