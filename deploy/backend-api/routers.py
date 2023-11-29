@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import datetime
 from typing import Optional, Tuple, List
 
@@ -17,7 +18,6 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import google.auth.exceptions
 import os
-from celery import Celery
 from firebase_admin import auth
 
 from env import get_secret
@@ -30,11 +30,6 @@ router = KRulesAPIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-celery_app = Celery('tasks',
-                    broker=get_secret("CELERY_BROKER"),
-                    result_backend=get_secret("CELERY_RESULTS_BACKEND")
-                    )
-
 GOOGLE_HTTP_REQUEST = google.auth.transport.requests.Request()
 
 api_key_header = APIKeyHeader(name="api-key", auto_error=False)
@@ -43,6 +38,7 @@ firestore_token_header = APIKeyHeader(name="Authorization", auto_error=False)
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 INGESTION_TOPIC = os.environ["INGESTION_TOPIC"]
+SCHEDULER_TOPIC = os.environ["SCHEDULER_TOPIC"]
 
 
 async def get_api_key(header: str = Security(api_key_header)):
@@ -93,16 +89,20 @@ class GroupUpdatePayload(BaseModel):
     entities_filter: Optional[list | None]
 
 
-class ScheduleCallbackPayload(BaseModel):
-    when: Optional[datetime | None]
-    seconds: Optional[int | None]
-    now: Optional[bool | None]
-    url: Optional[str | None]
-    header: Optional[Tuple[str, str] | None]
-    topic: Optional[str | None]
-    channels: Optional[List[str] | None]
-    replace_id: Optional[str | None]
-    message: Optional[str | None]
+class ScheduleCallbackBasePayload(BaseModel):
+    when: Optional[datetime | None] = None
+    seconds: Optional[int | None] = None
+    now: Optional[bool | None] = None
+    channels: Optional[List[str] | None] = None
+    message: Optional[str | None] = None
+
+
+class ScheduleCallbackPayload(ScheduleCallbackBasePayload):
+    replace_id: Optional[str | None] = None
+
+
+class ScheduleCallbackWithFilterPayload(ScheduleCallbackBasePayload):
+    filter: Tuple[str, str, str]
 
 
 class ScheduleCallbackResponsePayload(BaseModel):
@@ -119,22 +119,10 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
         )
-    # user_data = dict(token)
-    # print(">>>>>>>>>>>>> user_data: ", str(user_data))
-    # user = auth.get_user(user_data["user_id"])
-    # print(">>>>>>>>>>>>> user: ", str(user))
-    # active_subscription = user.custom_claims.get("active_subscription")
-    # print(">>>>>>>>>>>>> active_subscription", str(active_subscription))
-    # subscriptions = user.custom_claims.get("subscriptions")
-    # print(">>>>>>>>>>>>> subscriptions", str(subscriptions))
     return {
         "active_subscription": 1,
         "subscriptions": [1]
     }
-    # return {
-    #     "active_subscription": active_subscription,
-    #     "subscriptions": subscriptions
-    # }
 
 
 @router.post("/user/subscriptions/activate", summary="Set active subscription")
@@ -204,6 +192,19 @@ async def ingestion_data(subscription, group, entity_id, data: dict, api_key: AP
     )
 
 
+async def _schedule_request_base_check(body):
+    tt_sum = sum(p is not None for p in [body.when, body.seconds, body.now])
+    if tt_sum == 0 or tt_sum > 1:
+        raise HTTPException(status_code=400, detail="You must specify only one from when, seconds or now")
+    channels = body.channels
+    if len(channels) == 0:
+        raise HTTPException(status_code=400, detail="You must specify at least one channel")
+    data = body.dict()
+    when = data.get("when")
+    if when is not None:
+        data["when"] = when.isoformat()
+    return data
+
 @router.post("/{subscription}/{group}/{entity_id}/schedule")
 async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackPayload,
                             api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
@@ -211,40 +212,47 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
     when: Optional[datetime | None]
     seconds: Optional[int | None]
     now: Optional[bool | None]
-    url: Optional[str | None]
-    header: Optional[Tuple[str, str] | None]
-    topic: Optional[str | None]
     channels: Optional[List[str] | None]
     replace_id: Optional[str | None]
     message: Optional[str | None]
     """
-    tt_sum = sum(p is not None for p in [body.when, body.seconds, body.now])
-    if tt_sum == 0 or tt_sum > 1:
-        raise HTTPException(status_code=400, detail="You must specify only one from when, seconds or now")
+    data = await _schedule_request_base_check(body)
+    task_id = str(uuid.uuid4())
+    data["task_id"] = task_id
 
-    call_kwargs = {}
+    event_router_factory().route(
+        subject=f'entity|{subscription}|{group}|{entity_id}',
+        event_type=IngestionEventsV1.ENTITY_SCHEDULE,
+        payload={
+            "data": data
+        },
+        topic=SCHEDULER_TOPIC,
+    )
 
-    if body.when is not None:
-        call_kwargs["eta"] = body.when
+    return ScheduleCallbackResponsePayload(task_id="fake_id")
 
-    try:
-        result = celery_app.send_task(
-            "tasks.callback",
-            args=(subscription, group, entity_id),
-            kwargs={
-                "url": body.url,
-                "header": body.header,
-                "topic": body.topic,
-                "channels": body.channels,
-                "message": body.message,
-                "replace_id": body.replace_id,
-            },
-            **call_kwargs
-        )
-    except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex))
 
-    return ScheduleCallbackResponsePayload(task_id=result.task_id)
+@router.post("/{subscription}/{group}/schedule")
+async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackWithFilterPayload,
+                            api_key: APIKey = Depends(get_api_key)):
+    """
+    filter: Tuple[str, str, str]
+    when: Optional[datetime | None]
+    seconds: Optional[int | None]
+    now: Optional[bool | None]
+    channels: Optional[List[str] | None]
+    message: Optional[str | None]
+    """
+    data = await _schedule_request_base_check(body)
+
+    event_router_factory().route(
+        subject=f'entity|{subscription}|{group}|{entity_id}',
+        event_type=IngestionEventsV1.GROUP_SCHEDULE,
+        payload={
+            "data": data
+        },
+        topic=SCHEDULER_TOPIC,
+    )
 
 
 routers = [router]

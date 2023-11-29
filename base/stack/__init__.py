@@ -12,12 +12,14 @@ topic_ingestion = PubSubTopic("ingestion")
 topic_procevents = PubSubTopic("procevents")
 topic_firestore_updates = PubSubTopic("firestore-updates")
 topic_settings = PubSubTopic("settings")
+topic_scheduler = PubSubTopic("scheduler")
 
 pulumi.export("topics", {
     "procevents": topic_procevents,
     "ingestion": topic_ingestion,
     "firestore-updates": topic_firestore_updates,
     "settings": topic_settings,
+    "scheduler": topic_scheduler,
 })
 
 docker_registry = ArtifactRegistry(
