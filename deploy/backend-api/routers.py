@@ -205,6 +205,7 @@ async def _schedule_request_base_check(body):
         data["when"] = when.isoformat()
     return data
 
+
 @router.post("/{subscription}/{group}/{entity_id}/schedule")
 async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackPayload,
                             api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
