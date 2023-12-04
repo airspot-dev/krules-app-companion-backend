@@ -16,14 +16,21 @@ ingress_host = sane_utils.check_env("ingress_host")
 
 base_stack_ref = get_stack_reference("base")
 
+
+def get_static_ip_name():
+    ip_name = sane_utils.get_var_for_target("STATIC_IP_NAME")
+    if ip_name is None:
+        ip_name = f"{project_name}-{target}-ip"
+    return ip_name
+
 ingress = kubernetes.networking.v1.Ingress(
     f"{project_name}-{target}-ingress",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         annotations={
             "kubernetes.io/ingress.class": "gce",
-            "kubernetes.io/ingress.global-static-ip-name": f"{project_name}-{target}-ip",
+            "kubernetes.io/ingress.global-static-ip-name": get_static_ip_name(),
             "networking.gke.io/managed-certificates": f"{project_name}-{target}-cert",
-            #"networking.gke.io/v1beta1.FrontendConfig": f"{project_name}-{target}-fe-https",
+            # "networking.gke.io/v1beta1.FrontendConfig": f"{project_name}-{target}-fe-https",
         }
     ),
     spec=kubernetes.networking.v1.IngressSpecArgs(
