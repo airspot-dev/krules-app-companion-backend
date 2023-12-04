@@ -21,6 +21,8 @@ import os
 from firebase_admin import auth
 
 from env import get_secret
+import requests
+
 
 firebase_admin.initialize_app()
 
@@ -120,29 +122,34 @@ class ActiveSubscriptionPayload(BaseModel):
 
 
 @router.get("/user/subscriptions", summary="Get user subscriptions")
-async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
+async def get_user_subscriptions(token: APIKey = Security(firestore_token_header)):
     if token is None:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
         )
-    return {
-        "active_subscription": 1,
-        "subscriptions": [1]
-    }
+    print(f"#################### {token}")
+    resp = requests.get(
+        "http://firebase-users-handler/user/subscriptions",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 
 @router.post("/user/subscriptions/activate", summary="Set active subscription")
-async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
+async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Security(firestore_token_header)):
     if token is None:
         raise HTTPException(
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
         )
 
-    user_data = dict(token)
-    user = auth.get_user(user_data["user_id"])
-    user_claims = user.custom_claims.copy()
-    user_claims["active_subscription"] = payload.active_subscription
-    auth.update_user(user_data["user_id"], custom_claims=user_claims)
+    resp = requests.post(
+        "http://firebase-users-handler/user/subscriptions/activate",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 
 @router.delete("/{subscription}/{group}", summary="Delete group")
