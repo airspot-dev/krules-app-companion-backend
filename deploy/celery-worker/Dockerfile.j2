@@ -12,6 +12,6 @@ ADD {{ source.origin }} {{ source.destination }}
 RUN pip install psycopg2-binary celery[redis,sqlalchemy]
 RUN pip install requests
 
-RUN pip install ipython
+#RUN pip install ipython
 
 CMD celery -A tasks worker --loglevel=INFO

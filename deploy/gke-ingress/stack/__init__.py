@@ -63,6 +63,18 @@ ingress = kubernetes.networking.v1.Ingress(
                                 )
                             )
                         ),
+                        kubernetes.networking.v1.HTTPIngressPathArgs(
+                            path="/api/scheduler/v1/*",
+                            path_type="ImplementationSpecific",
+                            backend=kubernetes.networking.v1.IngressBackendArgs(
+                                service=kubernetes.networking.v1.IngressServiceBackendArgs(
+                                    name="backend-api",
+                                    port=kubernetes.networking.v1.ServiceBackendPortArgs(
+                                        number=80,
+                                    )
+                                )
+                            )
+                        ),
                     ]
                 )
             )

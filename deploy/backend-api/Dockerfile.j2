@@ -11,4 +11,3 @@ RUN pip install firebase-admin==6.1.0
 ADD {{ source.origin }} {{ source.destination }}
 {% endfor %}
 
-RUN pip install psycopg2-binary celery[redis,sqlalchemy]

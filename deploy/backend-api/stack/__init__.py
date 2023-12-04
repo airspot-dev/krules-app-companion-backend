@@ -32,6 +32,14 @@ topic_ingestion = gcp.pubsub.Topic.get(
     )
 )
 
+topic_scheduler = gcp.pubsub.Topic.get(
+    "scheduler",
+    base_stack_ref.get_output(
+        "topics"
+    ).apply(
+        lambda topics: topics.get("scheduler").get("id")
+    )
+)
 
 deployment = GkeDeployment(
     app_name,
@@ -39,12 +47,10 @@ deployment = GkeDeployment(
     gcp_repository=gcp_repository,
     access_secrets=[
         "ingestion_api_key",
-        #"celery_broker",
-        #"celery_results_backend",
-        #"subjects_redis_url",
     ],
     publish_to={
         "ingestion": topic_ingestion,
+        "scheduler": topic_scheduler,
     },
     app_container_kwargs=dict(
         env=[
@@ -59,14 +65,14 @@ deployment = GkeDeployment(
 
 
 # TODO: remove it (needed to get subscriptis)
-gcp.projects.IAMMember(
-    "firebase_admin",
-    member=deployment.sa.sa.email.apply(
-        lambda email: f"serviceAccount:{email}"
-    ),
-    project=sane_utils.get_project_id(),
-    role="roles/firebaseauth.admin",
-)
+# gcp.projects.IAMMember(
+#     "firebase_admin",
+#     member=deployment.sa.sa.email.apply(
+#         lambda email: f"serviceAccount:{email}"
+#     ),
+#     project=sane_utils.get_project_id(),
+#     role="roles/firebaseauth.admin",
+# )
 
 
 pulumi.export("service", deployment.service)
