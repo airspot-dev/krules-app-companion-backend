@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Any
 
 import firebase_admin
 import google.oauth2.id_token
@@ -27,6 +27,12 @@ firebase_admin.initialize_app()
 router = KRulesAPIRouter(
     prefix="/api/v1",
     tags=["apiV1"],
+    responses={404: {"description": "Not found"}},
+)
+
+scheduler = KRulesAPIRouter(
+    prefix="/api/scheduler/v1",
+    tags=["apiSchedulerV1"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -102,7 +108,7 @@ class ScheduleCallbackPayload(ScheduleCallbackBasePayload):
 
 
 class ScheduleCallbackWithFilterPayload(ScheduleCallbackBasePayload):
-    filter: Tuple[str, str, str]
+    filter: Tuple[str, str, Any]
 
 
 class ScheduleCallbackResponsePayload(BaseModel):
@@ -206,7 +212,7 @@ async def _schedule_request_base_check(body):
     return data
 
 
-@router.post("/{subscription}/{group}/{entity_id}/schedule")
+@scheduler.post("/{subscription}/{group}/{entity_id}")
 async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackPayload,
                             api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
     """
@@ -218,8 +224,14 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
     message: Optional[str | None]
     """
     data = await _schedule_request_base_check(body)
-    task_id = str(uuid.uuid4())
-    data["task_id"] = task_id
+    task_id = f"{subscription}|{str(uuid.uuid4())}"
+    data.update(dict(
+        task_id=task_id,
+        subscription=subscription,
+        group=group,
+
+        entity_id=entity_id
+    ))
 
     event_router_factory().route(
         subject=f'entity|{subscription}|{group}|{entity_id}',
@@ -230,12 +242,12 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
         topic=SCHEDULER_TOPIC,
     )
 
-    return ScheduleCallbackResponsePayload(task_id="fake_id")
+    return ScheduleCallbackResponsePayload(task_id=task_id)
 
 
-@router.post("/{subscription}/{group}/schedule")
-async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackWithFilterPayload,
-                            api_key: APIKey = Depends(get_api_key)):
+@scheduler.post("/{subscription}/{group}")
+async def schedule_callback_multi(subscription, group, body: ScheduleCallbackWithFilterPayload,
+                                  api_key: APIKey = Depends(get_api_key)):
     """
     filter: Tuple[str, str, str]
     when: Optional[datetime | None]
@@ -244,10 +256,18 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
     channels: Optional[List[str] | None]
     message: Optional[str | None]
     """
+
     data = await _schedule_request_base_check(body)
+    task_id = f"{subscription}|{str(uuid.uuid4())}"
+
+    data.update(dict(
+        task_id=task_id,
+        subscription=subscription,
+        group=group
+    ))
 
     event_router_factory().route(
-        subject=f'entity|{subscription}|{group}|{entity_id}',
+        subject=f'group|{subscription}|{group}',
         event_type=IngestionEventsV1.GROUP_SCHEDULE,
         payload={
             "data": data
@@ -255,5 +275,7 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
         topic=SCHEDULER_TOPIC,
     )
 
+    return ScheduleCallbackResponsePayload(task_id=task_id)
 
-routers = [router]
+
+routers = [router, scheduler]

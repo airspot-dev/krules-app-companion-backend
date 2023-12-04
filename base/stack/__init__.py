@@ -12,7 +12,9 @@ topic_ingestion = PubSubTopic("ingestion")
 topic_procevents = PubSubTopic("procevents")
 topic_firestore_updates = PubSubTopic("firestore-updates")
 topic_settings = PubSubTopic("settings")
-topic_scheduler = PubSubTopic("scheduler")
+topic_scheduler = PubSubTopic("scheduler") # events to be scheduled
+topic_scheduler_errors = PubSubTopic("scheduler-errors")  # errors on scheduling jobs
+topic_user_errors = PubSubTopic("user-errors")  # errors that somehow should be delivered to user (inconsistent input provided)
 
 pulumi.export("topics", {
     "procevents": topic_procevents,
@@ -20,6 +22,8 @@ pulumi.export("topics", {
     "firestore-updates": topic_firestore_updates,
     "settings": topic_settings,
     "scheduler": topic_scheduler,
+    "scheduler-errors": topic_scheduler_errors,
+    "user-errors": topic_user_errors
 })
 
 docker_registry = ArtifactRegistry(

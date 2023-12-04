@@ -20,8 +20,11 @@ sane_utils.make_prepare_build_context_recipes(
         "common",
     ],
     sources=[
-        "tasks.py",
-        #("ipython_config.py", "/root/.ipython/profile_default/"),
+        "requirements.txt",
+        "ruleset.py",
+        "ruleset_functions",
+        # "tasks.py",
+        # ("ipython_config.py", "/root/.ipython/profile_default/"),
     ],
 )
 

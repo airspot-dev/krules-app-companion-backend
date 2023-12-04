@@ -18,6 +18,7 @@ class SystemEventsV1:
 
     #ENTITY_CALLBACK = EventType(f"{PREFIX}.entity.v1.callback")
     #GROUP_CALLBACK = EventType(f"{PREFIX}.group.v1.callback")
+    CALLBACK_FAILED = EventType(f"{PREFIX}.callback.v1.failed")
     ENTITY_CREATED = EventType(f"{PREFIX}.entity.v1.created")
     ENTITY_DELETED = EventType(f"{PREFIX}.entity.v1.deleted")
     ENTITY_UPDATED = EventType(f"{PREFIX}.entity.v1.updated")
