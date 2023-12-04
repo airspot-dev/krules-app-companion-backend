@@ -74,7 +74,8 @@ auth.set_custom_user_claims(
 import requests
 
 __FIREBASE_USER_VERIFY_SERVICE = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword"
-__FIREBASE_API_KEY = "AIzaSyC2yQn0Fdm_Qh9Jm1dxjCpClTHyBEEKtlQ"
+# __FIREBASE_API_KEY = "AIzaSyC2yQn0Fdm_Qh9Jm1dxjCpClTHyBEEKtlQ"
+__FIREBASE_API_KEY = "AIzaSyDE8tw6q78MgUQABoDLwK5JXPuvImDneHE"
 def user_login(email, passwd):
     url = "%s?key=%s" % (__FIREBASE_USER_VERIFY_SERVICE, __FIREBASE_API_KEY)
     data = {"email": email,
