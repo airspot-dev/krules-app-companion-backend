@@ -23,8 +23,7 @@ rulesdata: List[Rule] = [
             ),
             SetSubjectProperties(
                 lambda payload: payload
-            ),
-            StoreSubject()
+            )
         ]
     ),
     Rule(
@@ -55,7 +54,6 @@ rulesdata: List[Rule] = [
             SetSubjectProperties(
                 lambda payload: payload
             ),
-            StoreSubject()
         ]
     ),
     Rule(
