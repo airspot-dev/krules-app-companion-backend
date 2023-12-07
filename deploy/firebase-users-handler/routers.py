@@ -65,7 +65,6 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
         )
     user_data = dict(token)
-    print(">>>>>>>>>>>>> user_data: ", str(user_data))
     return {
         "active_subscription": user_data.get("active_subscription", user_data["subscriptions"][0]),
         "subscriptions": user_data["subscriptions"]
