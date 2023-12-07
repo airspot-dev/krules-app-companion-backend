@@ -15,8 +15,8 @@ from firebase_admin import auth
 firebase_admin.initialize_app()
 
 router = KRulesAPIRouter(
-    prefix="/user",
-    tags=["user"],
+    prefix="/api/subscriptions/v1",
+    tags=["subscriptions"],
     responses={404: {"description": "Not found"}},
 )
 
@@ -58,7 +58,7 @@ async def check_firebase_user(header: str = Security(firestore_token_header)):
         return claims
 
 
-@router.get("/subscriptions", summary="Get user subscriptions")
+@router.get("/", summary="Get user subscriptions")
 async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
     if token is None:
         raise HTTPException(
@@ -71,7 +71,7 @@ async def get_user_subscriptions(token: APIKey = Depends(check_firebase_user)):
     }
 
 
-@router.post("/subscriptions/activate", summary="Set active subscription")
+@router.post("/activate", summary="Set active subscription")
 async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Depends(check_firebase_user)):
 
     if token is None:
