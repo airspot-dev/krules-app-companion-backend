@@ -16,9 +16,12 @@ class IngestionEventsV1:
 
 class SystemEventsV1:
 
-    #ENTITY_CALLBACK = EventType(f"{PREFIX}.entity.v1.callback")
-    #GROUP_CALLBACK = EventType(f"{PREFIX}.group.v1.callback")
+    ENTITY_CALLBACK = EventType(f"{PREFIX}.entity.v1.callback")
+    GROUP_CALLBACK = EventType(f"{PREFIX}.group.v1.callback")
     CALLBACK_FAILED = EventType(f"{PREFIX}.callback.v1.failed")
+    CALLBACK_ENTITY_NOTFOUND = EventType(f"{PREFIX}.callback.v1.EntityNotFound")
+    CALLBACK_CHANNEL_INVALID = EventType(f"{PREFIX}.callback.v1.InvalidChannel")
+    CALLBACK_CHANNEL_SEND_FAILURE = EventType(f"{PREFIX}.callback.v1.ChannelSendFailure")
     ENTITY_CREATED = EventType(f"{PREFIX}.entity.v1.created")
     ENTITY_DELETED = EventType(f"{PREFIX}.entity.v1.deleted")
     ENTITY_UPDATED = EventType(f"{PREFIX}.entity.v1.updated")

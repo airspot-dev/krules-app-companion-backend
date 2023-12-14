@@ -1,28 +1,27 @@
-import logging
 import uuid
-from datetime import datetime
-from typing import Optional, Tuple, List, Any
+from typing import Optional
+
+import os
+import uuid
+from typing import Optional
 
 import firebase_admin
-import google.oauth2.id_token
+import google.auth.exceptions
 import google.auth.transport.requests
+import google.oauth2.id_token
+import pysnooper
+import requests
+from fastapi import Security, HTTPException, Depends
 from fastapi.openapi.models import APIKey
-from krules_fastapi_env import KRulesAPIRouter
-from fastapi import Request, Header, Security, HTTPException, Depends
+from fastapi.security.api_key import APIKeyHeader
 from krules_core.providers import event_router_factory
+from krules_fastapi_env import KRulesAPIRouter
+from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 
 from common.event_types import IngestionEventsV1
-from fastapi.security.api_key import APIKeyHeader
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
-import google.auth.exceptions
-import os
-from firebase_admin import auth
-
+from common.models.scheduler import ScheduleCallbackSingleRequest, ScheduleCallbackMultiRequest
 from env import get_secret
-import requests
-
 
 firebase_admin.initialize_app()
 
@@ -97,21 +96,6 @@ class GroupUpdatePayload(BaseModel):
     entities_filter: Optional[list | None]
 
 
-class ScheduleCallbackBasePayload(BaseModel):
-    when: Optional[datetime | None] = None
-    seconds: Optional[int | None] = None
-    now: Optional[bool | None] = None
-    channels: Optional[List[str] | None] = None
-    message: Optional[str | None] = None
-
-
-class ScheduleCallbackPayload(ScheduleCallbackBasePayload):
-    replace_id: Optional[str | None] = None
-
-
-class ScheduleCallbackWithFilterPayload(ScheduleCallbackBasePayload):
-    filter: Tuple[str, str, Any]
-
 
 class ScheduleCallbackResponsePayload(BaseModel):
     task_id: Optional[str | None]
@@ -121,35 +105,35 @@ class ActiveSubscriptionPayload(BaseModel):
     active_subscription: int
 
 
-@router.get("/user/subscriptions", summary="Get user subscriptions")
-async def get_user_subscriptions(token: APIKey = Security(firestore_token_header)):
-    if token is None:
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
-        )
-    print(f"#################### {token}")
-    resp = requests.get(
-        "http://firebase-users-handler/user/subscriptions",
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    resp.raise_for_status()
-    return resp.json()
-
-
-@router.post("/user/subscriptions/activate", summary="Set active subscription")
-async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Security(firestore_token_header)):
-    if token is None:
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
-        )
-
-    resp = requests.post(
-        "http://firebase-users-handler/user/subscriptions/activate",
-        json=payload,
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    resp.raise_for_status()
-    return resp.json()
+# @router.get("/user/subscriptions", summary="Get user subscriptions")
+# async def get_user_subscriptions(token: APIKey = Security(firestore_token_header)):
+#     if token is None:
+#         raise HTTPException(
+#             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
+#         )
+#     print(f"#################### {token}")
+#     resp = requests.get(
+#         "http://firebase-users-handler/user/subscriptions",
+#         headers={"Authorization": f"Bearer {token}"}
+#     )
+#     resp.raise_for_status()
+#     return resp.json()
+#
+#
+# @router.post("/user/subscriptions/activate", summary="Set active subscription")
+# async def activate_subscription(payload: ActiveSubscriptionPayload, token: APIKey = Security(firestore_token_header)):
+#     if token is None:
+#         raise HTTPException(
+#             status_code=HTTP_401_UNAUTHORIZED, detail="Could not validate authorization token"
+#         )
+#
+#     resp = requests.post(
+#         "http://firebase-users-handler/user/subscriptions/activate",
+#         json=payload,
+#         headers={"Authorization": f"Bearer {token}"}
+#     )
+#     resp.raise_for_status()
+#     return resp.json()
 
 
 @router.delete("/{subscription}/{group}", summary="Delete group")
@@ -220,31 +204,16 @@ async def _schedule_request_base_check(body):
 
 
 @scheduler.post("/{subscription}/{group}/{entity_id}")
-async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackPayload,
+async def schedule_callback(subscription, group, entity_id, body: ScheduleCallbackSingleRequest,
                             api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
-    """
-    when: Optional[datetime | None]
-    seconds: Optional[int | None]
-    now: Optional[bool | None]
-    channels: Optional[List[str] | None]
-    replace_id: Optional[str | None]
-    message: Optional[str | None]
-    """
-    data = await _schedule_request_base_check(body)
     task_id = f"{subscription}|{str(uuid.uuid4())}"
-    data.update(dict(
-        task_id=task_id,
-        subscription=subscription,
-        group=group,
-
-        entity_id=entity_id
-    ))
 
     event_router_factory().route(
         subject=f'entity|{subscription}|{group}|{entity_id}',
         event_type=IngestionEventsV1.ENTITY_SCHEDULE,
         payload={
-            "data": data
+            "task_id": task_id,
+            "data": body.model_dump()
         },
         topic=SCHEDULER_TOPIC,
     )
@@ -253,30 +222,18 @@ async def schedule_callback(subscription, group, entity_id, body: ScheduleCallba
 
 
 @scheduler.post("/{subscription}/{group}")
-async def schedule_callback_multi(subscription, group, body: ScheduleCallbackWithFilterPayload,
-                                  api_key: APIKey = Depends(get_api_key)):
-    """
-    filter: Tuple[str, str, str]
-    when: Optional[datetime | None]
-    seconds: Optional[int | None]
-    now: Optional[bool | None]
-    channels: Optional[List[str] | None]
-    message: Optional[str | None]
-    """
+async def schedule_callback_multi(subscription, group, body: ScheduleCallbackMultiRequest,
+                                  api_key: APIKey = Depends(get_api_key)) -> ScheduleCallbackResponsePayload:
 
-    data = await _schedule_request_base_check(body)
+    #with pysnooper.snoop(watch=('body.rnd_delay',)):
     task_id = f"{subscription}|{str(uuid.uuid4())}"
-
-    data.update(dict(
-        task_id=task_id,
-        subscription=subscription,
-        group=group
-    ))
+    data = body.model_dump()
 
     event_router_factory().route(
         subject=f'group|{subscription}|{group}',
         event_type=IngestionEventsV1.GROUP_SCHEDULE,
         payload={
+            "task_id": task_id,
             "data": data
         },
         topic=SCHEDULER_TOPIC,

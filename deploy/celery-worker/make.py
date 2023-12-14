@@ -18,6 +18,7 @@ sane_utils.make_prepare_build_context_recipes(
     baselibs=[
         "celery_app",
         "common",
+        "channels",
     ],
     sources=[
         "tasks.py",

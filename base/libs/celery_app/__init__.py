@@ -20,5 +20,6 @@ if celery_result_backend is None:
 app = Celery(
     'cm-scheduler',
     broker=celery_broker,
-    result_backend=celery_result_backend
+    result_backend=celery_result_backend,
+#    accept_content='pickle'
 )

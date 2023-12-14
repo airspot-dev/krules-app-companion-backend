@@ -1,4 +1,5 @@
 from krules_core.base_functions.processing import *
+from krules_core.base_functions.filters import *
 from krules_core.models import Rule
 
 
@@ -12,6 +13,11 @@ rulesdata: List[Rule] = [
         subscribe_to=[
             IngestionEventsV1.ENTITY_SCHEDULE,
         ],
+        filters=[
+            SubjectNameMatch(
+                r"^entity\|(?P<subscription>[0-9]+)\|(?P<group>.*)\|(?P<entity_id>.*)$"
+            )
+        ],
         processing=[
             SingleScheduleEvent()
         ]
@@ -20,6 +26,11 @@ rulesdata: List[Rule] = [
         name="receive-group-schedule-event",
         subscribe_to=[
             IngestionEventsV1.GROUP_SCHEDULE,
+        ],
+        filters=[
+            SubjectNameMatch(
+                r"^group\|(?P<subscription>[0-9]+)\|(?P<group>.*)$"
+            )
         ],
         processing=[
             MultiScheduleEvents()

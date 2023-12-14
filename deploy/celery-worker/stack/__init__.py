@@ -2,6 +2,7 @@ import pulumi
 from pulumi import Config
 from pulumi_gcp.artifactregistry import Repository
 from pulumi_gcp.pubsub import Topic
+from pulumi_kubernetes.core.v1 import EnvVarArgs
 
 from krules_dev import sane_utils
 from krules_dev.sane_utils import get_stack_reference
@@ -30,6 +31,22 @@ topic_procevents = Topic.get(
         lambda topics: topics.get("procevents").get("id")
     )
 )
+topic_scheduler_errors = Topic.get(
+    "scheduler-errors",
+    base_stack_ref.get_output(
+        "topics"
+    ).apply(
+        lambda topics: topics.get("scheduler-errors").get("id")
+    )
+)
+topic_user_errors = Topic.get(
+    "user-errors",
+    base_stack_ref.get_output(
+        "topics"
+    ).apply(
+        lambda topics: topics.get("user-errors").get("id")
+    )
+)
 
 deployment = GkeDeployment(
     app_name,
@@ -41,8 +58,19 @@ deployment = GkeDeployment(
     ],
     publish_to={
         "procevents": topic_procevents,
+        "scheduler-errors": topic_scheduler_errors,
+        "user-errors": topic_user_errors,
     },
-    # subscribe_to={
+    use_firestore=True,
+    # app_container_kwargs={
+    #     "env": [
+    #         EnvVarArgs(
+    #             name="FIRESTORE_ID",
+    #             value=firestore_id,
+    #         )
+    #     ]
+    # }
+    # # subscribe_to={
     #     "defaultsink": topic_defaultsink,
     #     "ingestion": topic_ingestion,
     # }
