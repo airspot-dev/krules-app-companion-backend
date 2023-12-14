@@ -13,7 +13,7 @@ export class KrulesService {
   constructor(private http: HttpClient) {}
 
   getAvailableProjects(token: string) {
-    const url = `${this._basePath}/user/subscriptions`;
+    const url = `${this._host}/api/subscriptions/v1/`;
     return lastValueFrom(
       this.http.get(url, {
         headers: {

@@ -75,6 +75,18 @@ ingress = kubernetes.networking.v1.Ingress(
                                 )
                             )
                         ),
+                        kubernetes.networking.v1.HTTPIngressPathArgs(
+                            path="/api/subscriptions/v1/*",
+                            path_type="ImplementationSpecific",
+                            backend=kubernetes.networking.v1.IngressBackendArgs(
+                                service=kubernetes.networking.v1.IngressServiceBackendArgs(
+                                    name="firebase-authadmin",
+                                    port=kubernetes.networking.v1.ServiceBackendPortArgs(
+                                        number=80,
+                                    )
+                                )
+                            )
+                        ),
                     ]
                 )
             )
