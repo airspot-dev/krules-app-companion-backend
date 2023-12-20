@@ -1,15 +1,13 @@
+import abc
 import os
-from pprint import pprint
 from typing import Callable
 
+import requests
+from cloudevents.conversion import to_binary
+from cloudevents.http import CloudEvent
 from krules_core.providers import event_router_factory
 from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo
-import abc
-
-from cloudevents.conversion import to_structured, to_binary, to_json
-from cloudevents.http import CloudEvent
-import requests
 
 from common.event_types import SystemEventsV1
 from common.models.scheduler import SchedulerCallbackPayload

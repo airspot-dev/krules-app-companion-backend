@@ -134,6 +134,7 @@ def schedule_multi(self, subscription, group, filter, message, channels, task_rn
         else:
             docs = db.collection(f"{subscription}/groups/{group}").stream()
         for doc in docs:
+            eta = self.request.eta
             if task_rnd_delay > 0:
                 eta = parse(self.request.eta) + timedelta(seconds=random.randint(0, task_rnd_delay))
             if fresh_data:
