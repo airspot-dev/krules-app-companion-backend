@@ -53,7 +53,7 @@ deployment = GkeDeployment(
     access_secrets=[
         "subjects_redis_url",
         "celery_broker",
-        "celery_result_backend",
+        "celery_results_backend",
     ],
     subscribe_to=[
         (

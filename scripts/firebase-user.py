@@ -27,9 +27,9 @@ uid = "OFrn1tkdj9MI9GbHt0NkQDpipUq1"
 auth.set_custom_user_claims(
     uid,
     {
-        'subscription_id': 1,
-        'active_subscription': 1,
-        'subscriptions': [1, 2]
+        'subscription_id': 0,
+        'active_subscription': 0,
+        'subscriptions': [0, 1]
     }
 )
 uid_2 = "Gn9VoK6O77dSsulWwblOQ6t8WO53"

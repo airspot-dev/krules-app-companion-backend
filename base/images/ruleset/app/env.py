@@ -28,6 +28,8 @@ def _get_topic_id(subject, event_type):
 def get_secret(secret_name: str, default=None) -> str:
     global cache_secrets
     secret_name = secret_name.upper()
+    if secret_name in os.environ:
+        return os.environ[secret_name]
     if secret_name in cache_secrets:
         return cache_secrets[secret_name]
     secret_path = os.environ.get(f"{secret_name}_SECRET_PATH")
