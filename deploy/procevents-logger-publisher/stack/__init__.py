@@ -47,7 +47,7 @@ deployment = GkeDeployment(
     },
     subscribe_to=[
         (
-            "firestore-updates",
+            "procevents",
             {
                 "topic": topic_procevents.name,
                 #"enable_exactly_once_delivery": True,
