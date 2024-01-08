@@ -48,8 +48,8 @@ sane_utils.make_pulumi_stack_recipes(
 )
 
 
-@recipe(name="update_all")
-def updated_all():
+@recipe(name="update_all", info="Update all components")
+def update_all():
     log = structlog.get_logger()
     python = sh.Command(sane_utils.check_cmd("python3"))
 
