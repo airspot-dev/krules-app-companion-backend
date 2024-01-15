@@ -1,18 +1,19 @@
-from pprint import pprint
+#from pprint import pprint
+import json
 
 from krules_core.base_functions.processing import *
 from krules_core.models import Rule
 
 rulesdata: List[Rule] = [
     Rule(
-        name="pprint",
+        name="print",
         subscribe_to=[
-            "pprint"
+            "print"
         ],
         processing=[
             Process(
                 lambda payload: (
-                    pprint(payload)
+                    print(json.dumps(payload))
                 )
             )
         ]

@@ -111,8 +111,8 @@ class SchedulerCallbackPayload(BaseModel):
     task_id: str
     subscription: int
     group: str
-    entity_id: str
-    entity_state: dict
+    id: str
+    state: dict
     message: str
 
     @field_serializer('last_updated')

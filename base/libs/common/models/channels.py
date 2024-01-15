@@ -49,7 +49,7 @@ class PubSubChannelImpl(ChannelImpl):
     def send(self, payload: SchedulerCallbackPayload, exception_handler: Callable):
         event_router_factory().route(
             SystemEventsV1.ENTITY_CALLBACK,
-            f"entity|{payload.subscription}|{payload.group}|{payload.entity_id}",
+            f"entity|{payload.subscription}|{payload.group}|{payload.id}",
             payload.model_dump(),
             topic=self.topic,
             exception_handler=exception_handler
@@ -63,7 +63,7 @@ class WebhookChannelImpl(ChannelImpl):
     def send(self, payload: SchedulerCallbackPayload, exception_handler: Callable):
         attributes = {
             "type": SystemEventsV1.ENTITY_CALLBACK,
-            "subject": f"entity|{payload.subscription}|{payload.group}|{payload.entity_id}",
+            "subject": f"entity|{payload.subscription}|{payload.group}|{payload.id}",
             "source": os.environ["CE_SOURCE"]
         }
         attributes.update(
