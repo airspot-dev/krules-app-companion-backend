@@ -90,7 +90,7 @@ def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1
         payload = dict(
             subscription=subscription,
             group=group,
-            entity_id=entity_id,
+            id=entity_id,
             changed_properties=changed_properties,
             state=state,
             old_state=old_state,
