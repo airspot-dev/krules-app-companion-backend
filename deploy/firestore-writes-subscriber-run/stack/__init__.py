@@ -107,6 +107,25 @@ service = CloudRun(
                 ),
             ],
             path="/channels"
+        ),
+        "firestore-triggers-changes": dict(
+            matching_criterias=[
+                dict(
+
+                    attribute="type",
+                    value="google.cloud.firestore.document.v1.written",
+                ),
+                dict(
+                    attribute="database",
+                    value=sane_utils.get_firestore_database(),
+                ),
+                dict(
+                    attribute="document",
+                    operator="match-path-pattern",
+                    value="{subscription=*}/settings/automations/{document=*}"
+                ),
+            ],
+            path="/triggers"
         )
 
     },

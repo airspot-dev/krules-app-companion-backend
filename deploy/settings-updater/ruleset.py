@@ -3,6 +3,7 @@ from pprint import pprint
 from krules_core.base_functions.processing import *
 from krules_core.models import Rule
 
+from ruleset_functions import UpdateSubscriptionTriggers
 
 from common.event_types import SystemEventsV1
 
@@ -66,6 +67,20 @@ rulesdata: List[Rule] = [
         ],
         processing=[
             FlushSubject()
+        ]
+    ),
+    Rule(
+        name="trigger-updater",
+        description="""
+            Triggers are stored at subsription level
+        """,
+        subscribe_to=[
+            SystemEventsV1.TRIGGER_CREATED,
+            SystemEventsV1.TRIGGER_UPDATED,
+            SystemEventsV1.TRIGGER_DELETED,
+        ],
+        processing=[
+            UpdateSubscriptionTriggers(),
         ]
     ),
 ]

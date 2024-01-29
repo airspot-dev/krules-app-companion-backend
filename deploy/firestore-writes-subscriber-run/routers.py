@@ -16,6 +16,7 @@ logger = logging.getLogger()
 collection_regex = re.compile("^(?P<subscription>.+)[/]groups[/](?P<group>.+)[/](?P<entity_id>.+)$")
 schema_regex = re.compile("^(?P<subscription>.+)[/]settings[/]schemas[/](?P<group>.+)$")
 channel_regex = re.compile("^(?P<subscription>.+)[/]settings[/]channels[/](?P<channel_id>.+)$")
+triggers_regex = re.compile("^(?P<subscription>.+)[/]settings[/]automations[/](?P<trigger_id>.+)$")
 
 # firebase_admin.initialize_app()
 # db = firestore_client.client()
@@ -37,6 +38,19 @@ channels_router = KRulesAPIRouter(
     tags=["firestore-channels-updates"],
     responses={404: {"description": "Not found"}},
 )
+
+triggers_router = KRulesAPIRouter(
+    prefix="/triggers",
+    tags=["firestore-triggers-updates"],
+    responses={404: {"description": "Not found"}},
+)
+
+settings_router = KRulesAPIRouter(
+    prefix="/settings",
+    tags=["firestore-settings-updates"],
+    responses={404: {"description": "Not found"}},
+)
+
 
 DOCS_PATH = f"{os.environ['FIRESTORE_ID']}/documents/"
 
@@ -121,15 +135,12 @@ async def entity_written(request: Request):
 async def schema_written(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
-    print(payload)
     collection = payload.value.name.replace(DOCS_PATH, "")
     match = schema_regex.match(collection)
     if match is None:
-        print(">>>>>>>>>>>>>>>>> MATCH 1")
         collection = payload.old_value.name.replace(DOCS_PATH, "")
         match = schema_regex.match(collection)
     if match is not None:
-        print(">>>>>>>>>>>>>>>>> MATCH 2")
         event_type = SystemEventsV1.SCHEMA_UPDATED
         if not bool(payload.old_value):
             event_type = SystemEventsV1.SCHEMA_CREATED
@@ -187,4 +198,37 @@ async def channel_written(request: Request):
         )
 
 
-routers = [entities_router, schemas_router, channels_router]
+@triggers_router.post("")
+async def trigger_written(request: Request):
+    raw_pb = await request.body()
+    payload = firestore.DocumentEventData.deserialize(raw_pb)
+    collection = payload.value.name.replace(DOCS_PATH, "")
+    match = channel_regex.match(collection)
+    if not match:
+        collection = payload.old_value.name.replace(DOCS_PATH, "")
+        match = triggers_regex.match(collection)
+    if match:
+        event_type = SystemEventsV1.TRIGGER_UPDATED
+        if not bool(payload.old_value):
+            event_type = SystemEventsV1.TRIGGER_CREATED
+        elif not bool(payload.value):
+            event_type = SystemEventsV1.TRIGGER_DELETED
+        group_info = match.groupdict()
+        subscription = group_info["subscription"]
+        trigger_id = group_info["trigger_id"]
+        subject = subject_factory(f'trigger|{subscription}|{trigger_id}')
+        v_payload = {}
+        if event_type in (SystemEventsV1.TRIGGER_CREATED, SystemEventsV1.TRIGGER_UPDATED):
+            v_payload = map_value_to_plain_dict(payload.value)
+        elif event_type == SystemEventsV1.TRIGGER_DELETED:
+            v_payload = map_value_to_plain_dict(payload.old_value)
+        event_router.route(
+            event_type=event_type,
+            subject=subject,
+            payload=v_payload,
+            topic=os.environ["SETTINGS_TOPIC"],
+            subscription=subscription,
+        )
+
+
+routers = [entities_router, schemas_router, channels_router, triggers_router]

@@ -33,3 +33,6 @@ class SystemEventsV1:
     CHANNEL_CREATED = EventType(f"{PREFIX}.settings.channel.v1.created")
     CHANNEL_UPDATED = EventType(f"{PREFIX}.settings.channel.v1.updated")
     CHANNEL_DELETED = EventType(f"{PREFIX}.settings.channel.v1.deleted")
+    TRIGGER_CREATED = EventType(f"{PREFIX}.settings.trigger.v1.created")
+    TRIGGER_UPDATED = EventType(f"{PREFIX}.settings.trigger.v1.updated")
+    TRIGGER_DELETED = EventType(f"{PREFIX}.settings.trigger.v1.deleted")
