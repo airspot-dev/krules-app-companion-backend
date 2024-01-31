@@ -54,8 +54,8 @@ def _send_callback(task, channels, group, subscription, entity_id, entity_data, 
         task_id=task.request.id,
         subscription=subscription,
         group=group,
-        entity_id=entity_id,
-        entity_state=entity_data,
+        id=entity_id,
+        state=entity_data,
         message=message,
     )
     #print(payload.model_dump_json(indent=4))
@@ -81,7 +81,7 @@ def _send_callback(task, channels, group, subscription, entity_id, entity_data, 
                 del replace_ids[replace_id]
             return replace_ids
 
-        entity = subject_factory(f"entity|{payload.subscription}|{payload.group}|{payload.entity_id}")
+        entity = subject_factory(f"entity|{payload.subscription}|{payload.group}|{payload.id}")
         entity.set("replace_ids", _unset_replace_id, use_cache=False)
 
     for channel in channels:

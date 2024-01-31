@@ -3,7 +3,6 @@ import pulumi_gcp as gcp
 from pulumi import Config
 from pulumi_gcp.artifactregistry import Repository
 from pulumi_gcp.cloudrunv2 import ServiceTemplateContainerEnvArgs
-from pulumi_gcp.eventarc import TriggerDestinationCloudRunServiceArgs
 
 from krules_dev import sane_utils
 from krules_dev.sane_utils import get_stack_reference
@@ -120,6 +119,7 @@ service = CloudRun(
         ]
     }
  )
+pulumi.export("image", service.image)
 
 pulumi.export("trigger", service.triggers)
 

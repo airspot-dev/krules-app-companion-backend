@@ -30,7 +30,7 @@ class EventsourceStore(ProcessingFunction):
 
         subscription = self.payload.get("subscription")
         group = self.payload.get("group")
-        entity_id = self.payload.get("entity_id")
+        entity_id = self.payload.get("id")
         state = self.payload.get("state")
         changed_properties = self.payload.get("changed_properties")
 
