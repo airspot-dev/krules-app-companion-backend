@@ -8,6 +8,8 @@ import os
 import firebase_admin
 from firebase_admin import firestore as firestore_client
 
+from common.event_types import SystemEventsV1
+
 firebase_admin.initialize_app()
 db = firestore_client.Client(project=os.environ["FIRESTORE_PROJECT_ID"], database=os.environ["FIRESTORE_DATABASE"])
 
