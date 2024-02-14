@@ -1,3 +1,4 @@
+from krules_core.base_functions.filters import Filter
 from krules_core.base_functions.processing import *
 from krules_core.models import Rule
 
@@ -15,6 +16,11 @@ rulesdata: List[Rule] = [
         subscribe_to=[
             SystemEventsV1.ENTITY_CREATED,
             SystemEventsV1.ENTITY_UPDATED,
+        ],
+        filters=[
+            Filter(
+                lambda payload: len(payload.get("changed_properties")) > 0,
+            )
         ],
         processing=[
             GetExpireDateFromTTL(payload_dest="_expire_date"),

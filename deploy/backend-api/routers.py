@@ -142,7 +142,7 @@ async def delete_group(subscription, group: str, token: APIKey = Depends(check_f
         subject=f'group|{subscription}|{group}',
         event_type=IngestionEventsV1.GROUP_DELETE,
         payload={
-            "token": token
+            #"token": token
         },
         topic=INGESTION_TOPIC,
     )
@@ -154,7 +154,7 @@ async def delete_entity(subscription, group, entity_id: str, token: APIKey = Dep
         subject=f'entity|{subscription}|{group}|{entity_id}',
         event_type=IngestionEventsV1.ENTITY_DELETE,
         payload={
-            "token": token
+            #"token": token
         },
         topic=INGESTION_TOPIC,
     )
