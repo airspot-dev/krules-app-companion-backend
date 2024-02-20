@@ -12,7 +12,7 @@ from dateutil.parser import parse
 
 from common.event_types import SystemEventsV1
 from common.models.channels import Channel
-from common.models.scheduler import SchedulerCallbackPayload
+from common.models.scheduler import SchedulerCallbackPayload, EntityUpdatedCallbackPayload
 from . import app
 
 try:
@@ -50,7 +50,7 @@ class BaseTask(celery.Task):
 
 def _send_callback(task, channels, group, subscription, entity_id, entity_data, message):
     payload = SchedulerCallbackPayload(
-        last_updated=entity_data.pop("_last_update"), #.isoformat(),
+        last_updated=entity_data.pop("_last_update"),  # .isoformat(),
         task_id=task.request.id,
         subscription=subscription,
         group=group,
@@ -58,7 +58,8 @@ def _send_callback(task, channels, group, subscription, entity_id, entity_data, 
         state=entity_data,
         message=message,
     )
-    #print(payload.model_dump_json(indent=4))
+
+    # print(payload.model_dump_json(indent=4))
 
     def _exception_handler(ex):
         event_router_factory().route(
@@ -152,3 +153,14 @@ def schedule_multi(self, subscription, group, filter, message, channels, task_rn
 @app.task(base=BaseTask, bind=True)
 def schedule_multi_fetched(self, channels, subscription, group, entity_id, entity_data, message):
     _send_callback(self, channels, subscription, group, entity_id, entity_data, message)
+
+
+@app.task(base=BaseTask, bind=True)
+def send_entity_event(self, event, channels):
+    callback = EntityUpdatedCallbackPayload(**event)
+    subscription = callback.subscription
+    for channel in channels:
+        ch = Channel(
+            **subject_factory(f"channel|{subscription}|{channel}").dict()
+        )
+        ch.implementation().send(callback, lambda ex: print(ex))

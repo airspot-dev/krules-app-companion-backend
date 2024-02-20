@@ -16,13 +16,13 @@ base_outputs = get_stack_outputs("base")
 sane_utils.make_prepare_build_context_recipes(
     image_base=base_outputs.get("ruleset-image-base").get("repo_digest"),
     baselibs=[
-        "celery_app",
         "common",
-        #"channels",
+        "celery_app",
     ],
     sources=[
-        "tasks.py",
-        #("ipython_config.py", "/root/.ipython/profile_default/"),
+        "__app__.py",
+        "ruleset.py",
+        "requirements.txt",
     ],
 )
 
@@ -31,7 +31,7 @@ sane_utils.make_pulumi_stack_recipes(
     configs={
         "gcp:project": sane_utils.get_var_for_target("project_id"),
         "kubernetes:context": sane_utils.get_var_for_target("kubectl_ctx", default=f"gke_{project_name}-{target}"),
-        "base_stack": f"base-{target}",
+        "base_stack": f"base-{target}"
     },
     up_deps=[
         ".build/Dockerfile"

@@ -4,7 +4,7 @@ from krules_core.base_functions.processing import ProcessingFunction
 from krules_core.providers import subject_factory
 
 from common.event_types import SystemEventsV1
-from common.models.triggers import Trigger
+from common.models.subscriptions import Trigger
 
 
 class UpdateSubscriptionTriggers(ProcessingFunction):

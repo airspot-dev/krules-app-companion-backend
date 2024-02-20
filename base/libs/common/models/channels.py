@@ -10,7 +10,7 @@ from pydantic import BaseModel, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from common.event_types import SystemEventsV1
-from common.models.scheduler import SchedulerCallbackPayload
+from common.models.scheduler import SchedulerCallbackPayload, SchedulablePayload
 
 supported_channels = {
     'pub_sub': 'PubSubChannelImpl',
@@ -20,7 +20,7 @@ supported_channels = {
 
 class ChannelImpl(BaseModel, abc.ABC):
     @abc.abstractmethod
-    def send(self, payload: SchedulerCallbackPayload, exception_handler: Callable):
+    def send(self, payload: SchedulablePayload, exception_handler: Callable):
         pass
 
 
@@ -46,10 +46,12 @@ class Channel(BaseModel):
 class PubSubChannelImpl(ChannelImpl):
     topic: str
 
-    def send(self, payload: SchedulerCallbackPayload, exception_handler: Callable):
+    def send(self, payload: SchedulablePayload, exception_handler: Callable):
         event_router_factory().route(
-            SystemEventsV1.ENTITY_CALLBACK,
-            f"entity|{payload.subscription}|{payload.group}|{payload.id}",
+            # SystemEventsV1.ENTITY_CALLBACK,
+            payload.type,
+            #f"entity|{payload.subscription}|{payload.group}|{payload.id}",
+            payload.subject,
             payload.model_dump(),
             topic=self.topic,
             exception_handler=exception_handler
@@ -60,10 +62,12 @@ class WebhookChannelImpl(ChannelImpl):
     url: str
     headers: dict = {}
 
-    def send(self, payload: SchedulerCallbackPayload, exception_handler: Callable):
+    def send(self, payload: SchedulablePayload, exception_handler: Callable):
         attributes = {
-            "type": SystemEventsV1.ENTITY_CALLBACK,
-            "subject": f"entity|{payload.subscription}|{payload.group}|{payload.id}",
+            #"type": SystemEventsV1.ENTITY_CALLBACK,
+            "type": payload.type,
+            #"subject": f"entity|{payload.subscription}|{payload.group}|{payload.id}",
+            "subject": payload.subject,
             "source": os.environ["CE_SOURCE"]
         }
         attributes.update(
@@ -78,4 +82,8 @@ class WebhookChannelImpl(ChannelImpl):
             self.headers
         )
 
-        requests.post(self.url, data=body, headers=headers)
+        try:
+            response = requests.post(self.url, data=body, headers=headers)
+            response.raise_for_status()
+        except Exception as e:
+            exception_handler(e)

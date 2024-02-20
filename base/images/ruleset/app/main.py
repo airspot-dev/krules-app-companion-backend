@@ -23,15 +23,23 @@ logger = logging.getLogger(__file__)
 
 krules_env.init()
 
-# try:
-#     import env
-#
-#     env.init()
-# except ImportError:
-#     logger.warning("No app env defined!")
+app: KrulesApp | None = None
 
+try:
+    import __app__
 
-app = KrulesApp()
+    app = getattr(__app__, "app", None)
+
+except ImportError as ex:
+    if ex.name != "__app__":
+        raise
+    else:
+        logger.info("No __app__ module defined")
+
+if app is None:
+    app = KrulesApp()
+
+app.logger.info("KRules App Initialized", extra={"app": app})
 
 try:
     from routers import routers

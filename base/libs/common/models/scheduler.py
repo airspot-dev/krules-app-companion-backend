@@ -1,8 +1,13 @@
 import random
+from abc import ABC
 from datetime import datetime, timedelta
 from typing import List, Tuple, Any
 
-from pydantic import BaseModel, PositiveInt, model_validator, field_serializer
+from krules_core.providers import subject_factory
+from pydantic import BaseModel, PositiveInt, model_validator, field_serializer, Field, computed_field, field_validator
+
+from common.event_types import SystemEventsV1
+from common.models.entities import EntityEvent
 
 
 class ScheduleCallbackBase(BaseModel):
@@ -105,11 +110,17 @@ class ScheduleGroupTask(ScheduleTaskBase):
     task_rnd_delay: int | None = 0
 
 
-# THE CALLBACK (RECEIVED BY CLIENT) #######################
-class SchedulerCallbackPayload(BaseModel):
+class SchedulablePayload(BaseModel, ABC):
+    type: str = Field(exclude=True)
+    subject: str = Field(exclude=True)
+    subscription: PositiveInt
+
+
+class SchedulerCallbackPayload(SchedulablePayload):
+    type: str = Field(SystemEventsV1.ENTITY_CALLBACK, exclude=True)
+
     last_updated: datetime
     task_id: str
-    subscription: int
     group: str
     id: str
     state: dict
@@ -118,3 +129,18 @@ class SchedulerCallbackPayload(BaseModel):
     @field_serializer('last_updated')
     def serialize_dt(self, dt: datetime, _info):
         return dt.isoformat()
+
+    @model_validator(mode='before')
+    def validate_mode(cls, values):
+        if "subject" not in values:
+            values["subject"] = f"entity|{values.get('subscription')}|{values.get('group')}|{values.get('id')}"
+        return values
+
+
+class EntityUpdatedCallbackPayload(SchedulablePayload, EntityEvent[dict]):
+
+    @model_validator(mode='before')
+    def validate_mode(cls, values):
+        if "subject" not in values:
+            values["subject"] = f"entity|{values.get('subscription')}|{values.get('group')}|{values.get('id')}"
+        return values
