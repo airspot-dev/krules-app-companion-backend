@@ -157,7 +157,11 @@ def schedule_multi_fetched(self, channels, subscription, group, entity_id, entit
 
 @app.task(base=BaseTask, bind=True)
 def send_entity_event(self, event, channels):
-    callback = EntityUpdatedCallbackPayload(**event)
+    try:
+        callback = EntityUpdatedCallbackPayload.parse_obj(event)
+    except ValidationError as e:
+        print(e.json())
+        raise
     subscription = callback.subscription
     for channel in channels:
         ch = Channel(

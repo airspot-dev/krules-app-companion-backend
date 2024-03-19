@@ -91,7 +91,7 @@ class ScheduleTaskBase(BaseModel):
 
 
 class ScheduleEntityTask(ScheduleTaskBase):
-    subscription: PositiveInt
+    subscription: int
     group: str
     entity_id: str
     replace_id: str | None = None
@@ -104,7 +104,7 @@ class ScheduleEntityTask(ScheduleTaskBase):
 
 
 class ScheduleGroupTask(ScheduleTaskBase):
-    subscription: PositiveInt
+    subscription: int
     group: str
     filter: Tuple[str, str, Any] | None = None
     task_rnd_delay: int | None = 0
@@ -113,7 +113,7 @@ class ScheduleGroupTask(ScheduleTaskBase):
 class SchedulablePayload(BaseModel, ABC):
     type: str = Field(exclude=True)
     subject: str = Field(exclude=True)
-    subscription: PositiveInt
+    subscription: int
 
 
 class SchedulerCallbackPayload(SchedulablePayload):
@@ -140,7 +140,7 @@ class SchedulerCallbackPayload(SchedulablePayload):
 class EntityUpdatedCallbackPayload(SchedulablePayload, EntityEvent[dict]):
 
     @model_validator(mode='before')
-    def validate_mode(cls, values):
+    def validate_subject(cls, values):
         if "subject" not in values:
             values["subject"] = f"entity|{values.get('subscription')}|{values.get('group')}|{values.get('id')}"
         return values
