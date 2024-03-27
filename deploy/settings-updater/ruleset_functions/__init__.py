@@ -17,13 +17,14 @@ class UpdateSubscriptionTriggers(ProcessingFunction):
             if value is None:
                 value = {}
             if self.event_type in [SystemEventsV1.TRIGGER_CREATED, SystemEventsV1.TRIGGER_UPDATED] and self.payload.get('running'):
-                value[self.payload.get('id')] = Trigger(**self.payload).model_dump()
+                value[self.payload.get('id')] = Trigger(**self.payload).dict()
             elif self.event_type == SystemEventsV1.TRIGGER_DELETED or self.payload.get('running') is False:
+                pprint(value)
                 try:
                     del value[self.payload.get('id')]
                 except KeyError:
                     pass
-
+            pprint(value)
             return value
 
         subject = subject_factory(f"subscription|{self.payload.get('_event_info').get('subscription')}")

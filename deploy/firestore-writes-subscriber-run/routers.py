@@ -203,7 +203,7 @@ async def trigger_written(request: Request):
     raw_pb = await request.body()
     payload = firestore.DocumentEventData.deserialize(raw_pb)
     collection = payload.value.name.replace(DOCS_PATH, "")
-    match = channel_regex.match(collection)
+    match = triggers_regex.match(collection)
     if not match:
         collection = payload.old_value.name.replace(DOCS_PATH, "")
         match = triggers_regex.match(collection)
