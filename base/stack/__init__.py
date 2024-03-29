@@ -178,7 +178,14 @@ gcp.firestore.Index(
         )
     ]
 )
-
+expire_field = gcp.firestore.Field(
+    "ttl-field",
+    project=sane_utils.get_firestore_project_id(),
+    database=sane_utils.get_firestore_database(),
+    collection="event_sourcing",
+    field="expire_date",
+    ttl_config=gcp.firestore.FieldTtlConfigArgs()
+)
 
 # TODO: not working (rules not updated) !!!!
 firestore_rules = """\

@@ -20,7 +20,7 @@ class GetExpireDateFromTTL(ProcessingFunction):
         subscription = self.payload.get("subscription")
         group = self.payload.get("group")
         schema = subject_factory(f"schema|{subscription}|{group}")
-        ttl = schema.get("ttl", default={"hours": 24})
+        ttl = schema.get("ttl", default={"hours": 1})
         self.payload[payload_dest] = datetime.now(timezone.utc) + timedelta(**ttl)
 
 
