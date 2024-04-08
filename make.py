@@ -78,6 +78,8 @@ def update_all():
             _make()
         with sh.pushd("celery-worker"):
             _make()
+        with sh.pushd("triggers-processor"):
+            _make()
         with sh.pushd("frontend"):
             _make()
         with sh.pushd("gke-ingress"):
