@@ -164,7 +164,14 @@ def send_entity_event(self, event, channels):
         raise
     subscription = callback.subscription
     for channel in channels:
-        ch = Channel(
-            **subject_factory(f"channel|{subscription}|{channel}").dict()
-        )
+        try:
+            ch = Channel.parse_obj(
+                subject_factory(f"channel|{subscription}|{channel}").dict()
+            )
+        except ValidationError as e:
+            print(e.json())
+            raise
+        # ch = Channel(
+        #     **subject_factory(f"channel|{subscription}|{channel}").dict()
+        # )
         ch.implementation().send(callback, lambda ex: print(ex))
