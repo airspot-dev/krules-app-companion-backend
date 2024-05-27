@@ -7,6 +7,7 @@ from pulumi_kubernetes.core.v1 import EnvVarArgs
 from krules_dev import sane_utils
 from krules_dev.sane_utils import get_stack_reference
 from krules_dev.sane_utils.pulumi.components import GkeDeployment
+from krules_dev.sane_utils.pulumi.components.gke_statefulset import GkeStatefulSet
 
 config = Config()
 
@@ -47,8 +48,7 @@ topic_user_errors = Topic.get(
         lambda topics: topics.get("user-errors").get("id")
     )
 )
-
-deployment = GkeDeployment(
+deployment = GkeStatefulSet(
     app_name,
     gcp_repository=gcp_repository,
     access_secrets=[
@@ -62,18 +62,20 @@ deployment = GkeDeployment(
         "user-errors": topic_user_errors,
     },
     use_firestore=True,
+    # app_container_pvc_mounts={
+    #     "celery-data": {
+    #         "storage": "1Gi",
+    #         "mount_path": "/var/lib/celery"
+    #     }
+    # },
     # app_container_kwargs={
     #     "env": [
     #         EnvVarArgs(
-    #             name="FIRESTORE_ID",
-    #             value=firestore_id,
+    #             name="CELERY_STATE_DB",
+    #             value="/var/lib/celery/state.db",
     #         )
     #     ]
     # }
-    # # subscribe_to={
-    #     "defaultsink": topic_defaultsink,
-    #     "ingestion": topic_ingestion,
-    # }
-
 )
+
 
