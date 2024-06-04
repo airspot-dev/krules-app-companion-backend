@@ -1,5 +1,8 @@
 import os
 from datetime import datetime, timezone
+from typing import Dict, Any
+
+from dateutil import parser
 
 import firebase_admin
 from firebase_admin import firestore
@@ -38,7 +41,20 @@ def delete_collection(coll_ref, batch_size=10):
 def _get_db():
     return firestore.Client(project=os.environ["FIRESTORE_PROJECT_ID"], database=os.environ["FIRESTORE_DATABASE"])
 
+def parse_flexible_datetime(date_string: str) -> datetime:
+    # Use dateutil.parser to parse the date string
+    return parser.parse(date_string)
 
+def process_dictionary(data: Dict[str, Any]) -> Dict[str, Any]:
+    for key, value in data.items():
+        if isinstance(value, str) and value.startswith("dt|"):
+            try:
+                # Extract the datetime part and parse it
+                date_string = value[3:]  # Remove the "dt|" prefix
+                data[key] = parse_flexible_datetime(date_string)
+            except (ValueError, TypeError) as e:
+                print(f"Error parsing date string {value}: {e}")
+    return data
 class WriteDocument(ProcessingFunction):
 
     def execute(self, collection, data, document=None, subject_dest=None, track_last_update=False):
@@ -46,6 +62,8 @@ class WriteDocument(ProcessingFunction):
         db = _get_db()
         if track_last_update:
             data["_last_update"] = datetime.now(timezone.utc)
+
+        data = process_dictionary(data)
         if document is not None:
             doc_ref = db.collection(collection).document(document)
             doc_ref.set(data, merge=True)
