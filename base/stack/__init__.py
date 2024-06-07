@@ -8,28 +8,27 @@ from krules_dev.sane_utils.pulumi.components import (
     ArtifactRegistry, SaneDockerImage, FirestoreDB,
 )
 
-topic_ingestion = PubSubTopic("ingestion")
-topic_procevents = PubSubTopic("procevents")
-topic_firestore_updates = PubSubTopic("firestore-updates")
-topic_settings = PubSubTopic("settings")
-topic_scheduler = PubSubTopic("scheduler") # events to be scheduled
-topic_scheduler_errors = PubSubTopic("scheduler-errors")  # errors on scheduling jobs
-topic_user_errors = PubSubTopic("user-errors")  # errors that somehow should be delivered to user (inconsistent input provided)
+# topic_ingestion = PubSubTopic("ingestion")
+# topic_procevents = PubSubTopic("procevents")
+# topic_firestore_updates = PubSubTopic("firestore-updates")
+# topic_settings = PubSubTopic("settings")
+# topic_scheduler = PubSubTopic("scheduler") # events to be scheduled
+# topic_scheduler_errors = PubSubTopic("scheduler-errors")  # errors on scheduling jobs
+# topic_user_errors = PubSubTopic("user-errors")  # errors that somehow should be delivered to user (inconsistent input provided)
 
-pulumi.export("topics", {
-    "procevents": topic_procevents,
-    "ingestion": topic_ingestion,
-    "firestore-updates": topic_firestore_updates,
-    "settings": topic_settings,
-    "scheduler": topic_scheduler,
-    "scheduler-errors": topic_scheduler_errors,
-    "user-errors": topic_user_errors
-})
+
+pulumi.export("topics.ingestion.id", PubSubTopic("ingestion").id)
+pulumi.export("topics.firestore-updates.id", PubSubTopic("firestore-updates").id)
+pulumi.export("topics.settings.id", PubSubTopic("settings").id)
+pulumi.export("topics.scheduler.id", PubSubTopic("scheduler").id)
+pulumi.export("topics.scheduler-errors.id", PubSubTopic("scheduler-errors").id)
+pulumi.export("topics.user-errors.id", PubSubTopic("user-errors").id)
+pulumi.export("topics.procevents.id", PubSubTopic("procevents").id)
 
 docker_registry = ArtifactRegistry(
     "docker-registry",
 )
-pulumi.export("docker-repository", docker_registry.repository)
+pulumi.export("docker-repository.id", docker_registry.repository.id)
 
 namespace = kubernetes.core.v1.Namespace(
     "gke-namespace",

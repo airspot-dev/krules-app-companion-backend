@@ -16,13 +16,8 @@ base_stack_ref = get_stack_reference("base")
 
 gcp_repository = Repository.get(
     "gcp_repository",
-    base_stack_ref.get_output(
-        "docker-repository"
-    ).apply(
-        lambda repository: repository.get("id")
-    )
+    base_stack_ref.require_output("docker-repository.id")
 )
-
 
 deployment = GkeDeployment(
     app_name,
@@ -30,17 +25,16 @@ deployment = GkeDeployment(
     gcp_repository=gcp_repository,
     app_container_kwargs=dict(
         env=[
-            EnvVarArgs(
-                name="FIRESTORE_PROJECT_ID",
-                value=sane_utils.get_firestore_project_id(),
-            ),
+            # EnvVarArgs(
+            #     name="FIRESTORE_PROJECT_ID",
+            #     value=sane_utils.get_firestore_project_id(),
+            # ),
         ]
     ),
     #use_firestore=True,
 )
 
 
-# TODO: remove it (needed to get subscriptis)
 gcp.projects.IAMMember(
     "firebase_admin",
     member=deployment.sa.sa.email.apply(

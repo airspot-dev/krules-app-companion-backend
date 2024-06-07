@@ -17,20 +17,12 @@ base_stack_ref = get_stack_reference("base")
 
 gcp_repository = gcp.artifactregistry.Repository.get(
     "gcp_repository",
-    base_stack_ref.get_output(
-        "docker-repository"
-    ).apply(
-        lambda repository: repository.get("id")
-    )
+    base_stack_ref.require_output("docker-repository.id")
 )
 
 topic_procevents = gcp.pubsub.Topic.get(
     "procevents",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("procevents").get("id")
-    )
+    base_stack_ref.require_output("topics.procevents.id")
 )
 
 
@@ -50,7 +42,6 @@ deployment = GkeDeployment(
             "procevents",
             {
                 "topic": topic_procevents.name,
-                #"enable_exactly_once_delivery": True,
                 "ack_deadline_seconds": 20,
             }
         ),

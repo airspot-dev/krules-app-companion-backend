@@ -23,6 +23,7 @@ def get_static_ip_name():
         ip_name = f"{project_name}-{target}-ip"
     return ip_name
 
+
 ingress = kubernetes.networking.v1.Ingress(
     f"{project_name}-{target}-ingress",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(

@@ -16,29 +16,17 @@ base_stack_ref = get_stack_reference("base")
 
 gcp_repository = Repository.get(
     "gcp_repository",
-    base_stack_ref.get_output(
-        "docker-repository"
-    ).apply(
-        lambda repository: repository.get("id")
-    )
+    base_stack_ref.require_output("docker-repository.id")
 )
 
 topic_ingestion = gcp.pubsub.Topic.get(
     "ingestion",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("ingestion").get("id")
-    )
+    base_stack_ref.require_output("topics.ingestion.id")
 )
 
 topic_scheduler = gcp.pubsub.Topic.get(
     "scheduler",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("scheduler").get("id")
-    )
+    base_stack_ref.require_output("topics.scheduler.id")
 )
 
 deployment = GkeDeployment(
@@ -54,10 +42,10 @@ deployment = GkeDeployment(
     },
     app_container_kwargs=dict(
         env=[
-            EnvVarArgs(
-                name="FIRESTORE_PROJECT_ID",
-                value=sane_utils.get_firestore_project_id(),
-            ),
+            # EnvVarArgs(
+            #     name="FIRESTORE_PROJECT_ID",
+            #     value=sane_utils.get_firestore_project_id(),
+            # ),
         ]
     ),
     #use_firestore=True,
@@ -75,4 +63,4 @@ deployment = GkeDeployment(
 # )
 
 
-pulumi.export("service", deployment.service)
+#pulumi.export("service", deployment.service)

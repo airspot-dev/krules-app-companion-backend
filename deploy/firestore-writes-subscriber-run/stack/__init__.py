@@ -16,29 +16,21 @@ base_stack_ref = get_stack_reference("base")
 
 gcp_repository = Repository.get(
     "gcp_repository",
-    base_stack_ref.get_output(
-        "docker-repository"
-    ).apply(
-        lambda repository: repository.get("id")
-    )
+    base_stack_ref.require_output("docker-repository.id")
 )
+
 
 topic_firestore_updates = gcp.pubsub.Topic.get(
     "firestore-updates",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("firestore-updates").get("id")
-    )
+    base_stack_ref.require_output("topics.firestore-updates.id")
 )
+
 topic_settings = gcp.pubsub.Topic.get(
     "settings",
-    base_stack_ref.get_output(
-        "topics"
-    ).apply(
-        lambda topics: topics.get("settings").get("id")
-    )
+    base_stack_ref.require_output("topics.settings.id")
 )
+
+
 
 service = CloudRun(
     app_name,

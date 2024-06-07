@@ -2,7 +2,7 @@
   "name": "krules",
   "version": "0.0.0",
   "engines": {
-    "node": "18.14.2"
+    "node": "18.19"
   },
   "scripts": {
     "ng": "ng",
