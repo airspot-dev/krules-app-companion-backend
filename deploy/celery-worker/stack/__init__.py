@@ -40,7 +40,7 @@ deployment = GkeStatefulSet(
     access_secrets=[
         "subjects_redis_url",
         "celery_broker",
-        "celery_result_backend",
+        #"celery_result_backend",
     ],
     publish_to={
         "procevents": topic_procevents,
