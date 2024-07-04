@@ -1,11 +1,15 @@
 import pulumi_kubernetes as kubernetes
-from pulumi import Config
+import pulumi
 
 from krules_dev import sane_utils
 from krules_dev.sane_utils import get_stack_reference
 
+#from pulumi_kubernetes import Provider as k8s_provider
+import pulumi_gcp as gcp
+
+
 # Initialize a config object
-config = Config()
+config = pulumi.Config()
 
 # Get the name of the "parent" stack that we will reference.
 app_name = sane_utils.check_env("app_name")
@@ -23,6 +27,20 @@ def get_static_ip_name():
         ip_name = f"{project_name}-{target}-ip"
     return ip_name
 
+gcp_provider = gcp.Provider("gcp-provider", project=sane_utils.get_project_id())
+
+# Create the ManagedCertificate
+# managed_cert = gcp.compute.ManagedSslCertificate(
+#     f"{project_name}-{target}-backend-ingress",
+#     name=sane_utils.name_resource("backend-ingress"),
+#     managed=gcp.compute.ManagedSslCertificateManagedArgs(
+#         domains=[ingress_host],
+#     ),
+#     opts=pulumi.ResourceOptions(provider=gcp_provider),
+# )
+
+# # use managed_cert.name in the Ingress annotations
+#managed_certificate_name = managed_cert.name
 
 ingress = kubernetes.networking.v1.Ingress(
     f"{project_name}-{target}-ingress",
@@ -30,8 +48,8 @@ ingress = kubernetes.networking.v1.Ingress(
         annotations={
             "kubernetes.io/ingress.class": "gce",
             "kubernetes.io/ingress.global-static-ip-name": get_static_ip_name(),
-            "networking.gke.io/managed-certificates": f"{project_name}-{target}-cert",
             # "networking.gke.io/v1beta1.FrontendConfig": f"{project_name}-{target}-fe-https",
+            #"networking.gke.io/managed-certificates": managed_certificate_name,
         }
     ),
     spec=kubernetes.networking.v1.IngressSpecArgs(
@@ -95,31 +113,17 @@ ingress = kubernetes.networking.v1.Ingress(
     )
 )
 
-managed_certificate = kubernetes.apiextensions.CustomResource(
-    f"{project_name}-{target}-cert",
-    api_version="networking.gke.io/v1",
-    kind="ManagedCertificate",
+be_https_policy = kubernetes.apiextensions.CustomResource(
+    f"{project_name}-{target}-backend-https",
+    api_version="networking.gke.io/v1beta1",
+    kind="FrontendConfig",
     metadata={
-        "name": f"{project_name}-{target}-cert",
+        "name": f"{project_name}-{target}-backend-https",
     },
     spec={
-        "domains": [
-            ingress_host,
-        ],
+        "sslPolicy": "gke-ingress-ssl-policy-https",
+        "redirectToHttps": {
+            "enabled": True
+        }
     },
 )
-
-# fe_https_policy = kubernetes.apiextensions.CustomResource(
-#     f"{project_name}-{target}-fe-https",
-#     api_version="networking.gke.io/v1beta1",
-#     kind="FrontendConfig",
-#     metadata={
-#         "name": f"{project_name}-{target}-fe-https",
-#     },
-#     spec={
-#         "sslPolicy": "gke-ingress-ssl-policy-https",
-#         "redirectToHttps": {
-#             "enabled": True
-#         }
-#     },
-# )

@@ -24,6 +24,7 @@ sane_utils.google.make_enable_apis_recipe(
         "firestore",
         "eventarc",
         "iam",
+        "networkservices",
     ]
 )
 
