@@ -1,1 +1,2 @@
 krules-dev-support==0.12.23
+krules-companion-client==0.9.5
