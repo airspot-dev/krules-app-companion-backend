@@ -6,6 +6,7 @@ from pulumi import Config
 from krules_dev import sane_utils
 from krules_dev.sane_utils import get_stack_reference
 from krules_dev.sane_utils.pulumi.components import GkeDeployment
+from pulumi_kubernetes.core.v1 import EnvVarArgs
 
 # Initialize a config object
 config = Config()
@@ -37,6 +38,14 @@ deployment = GkeDeployment(
         ]
     },
     gcp_repository=gcp_repository,
+    # app_container_kwargs={
+    #     "env": [
+    #         EnvVarArgs(
+    #             name="CELERY_BROKER",
+    #             #value=dd['database'],
+    #         ),
+    #     ]
+    # }
 )
 
 pulumi.export("service", deployment.service)
