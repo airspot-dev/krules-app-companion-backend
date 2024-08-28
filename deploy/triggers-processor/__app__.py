@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 from contextlib import asynccontextmanager
@@ -12,11 +13,20 @@ data_lock = threading.RLock()
 
 subscriptions_data: Dict[str, Subscription] = {}
 
+# Cache to store Subject instances to avoid redis connections multiplication
+subject_cache = {}
 
 def update_subscription(subscription: str):
     try:
+        # Reuse existing Subject if available
+        if subscription in subject_cache:
+            subject = subject_cache[subscription]
+        else:
+            subject = subject_factory(f"subscription|{subscription}", use_cache_default=False)
+            subject_cache[subscription] = subject
+
         subscriptions_data[subscription] = Subscription(
-            **subject_factory(f"subscription|{subscription}").dict()
+            **subject.dict()
         )
     except Exception as e:
         print(f">>> ERROR UPDATING SUBSCRIPTION DATA ({subscription}): {e}")
@@ -32,7 +42,7 @@ def _update_subscriptions_data():
             for subscription in subscriptions:
                 print(">>> REFRESHING ", subscription)
                 update_subscription(subscription)
-        time.sleep(10)
+        time.sleep(int(os.environ.get("REFRESH_INTERVAL", 10)))
 
 
 @asynccontextmanager
