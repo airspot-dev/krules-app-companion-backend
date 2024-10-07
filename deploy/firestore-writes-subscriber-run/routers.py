@@ -2,11 +2,11 @@ import logging
 import os
 import re
 
+from fastapi import APIRouter
 from google.events.cloud import firestore
 from google.events.cloud.firestore_v1 import DocumentEventData
 from krules_core.providers import event_router_factory
 from krules_core.providers import subject_factory
-from krules_fastapi_env import KRulesAPIRouter
 from starlette.requests import Request
 
 from common.event_types import SystemEventsV1
@@ -21,31 +21,31 @@ triggers_regex = re.compile("^(?P<subscription>.+)[/]settings[/]automations[/](?
 # firebase_admin.initialize_app()
 # db = firestore_client.client()
 
-entities_router = KRulesAPIRouter(
+entities_router = APIRouter(
     prefix="/entities",
     tags=["firestore-entity-updates"],
     responses={404: {"description": "Not found"}},
 )
 
-schemas_router = KRulesAPIRouter(
+schemas_router = APIRouter(
     prefix="/schemas",
     tags=["firestore-schemas-updates"],
     responses={404: {"description": "Not found"}},
 )
 
-channels_router = KRulesAPIRouter(
+channels_router = APIRouter(
     prefix="/channels",
     tags=["firestore-channels-updates"],
     responses={404: {"description": "Not found"}},
 )
 
-triggers_router = KRulesAPIRouter(
+triggers_router = APIRouter(
     prefix="/triggers",
     tags=["firestore-triggers-updates"],
     responses={404: {"description": "Not found"}},
 )
 
-settings_router = KRulesAPIRouter(
+settings_router = APIRouter(
     prefix="/settings",
     tags=["firestore-settings-updates"],
     responses={404: {"description": "Not found"}},
@@ -231,4 +231,4 @@ async def trigger_written(request: Request):
         )
 
 
-routers = [entities_router, schemas_router, channels_router, triggers_router]
+

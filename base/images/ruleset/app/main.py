@@ -40,23 +40,6 @@ if app is None:
     app = KrulesApp()
 
 app.logger.info("KRules App Initialized", extra={"app": app})
-
-try:
-    from routers import routers
-
-    for router in routers:
-        app.include_router(router)
-except ImportError:
-    logger.warning("No router defined!")
-
-try:
-    from middlewares import middlewares
-
-    for cls, kwargs in middlewares:
-        app.add_middleware(cls, **kwargs)
-except ImportError:
-    logger.warning("No app middleware defined!")
-
 event_router = event_router_factory()
 
 

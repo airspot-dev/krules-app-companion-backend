@@ -60,10 +60,6 @@ gcp.firestore.Index(
         gcp.firestore.IndexFieldArgs(
             field_path="datetime",
             order="ASCENDING",
-        ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
-            order="ASCENDING",
         )
     ]
 )
@@ -81,10 +77,6 @@ gcp.firestore.Index(
         ),
         gcp.firestore.IndexFieldArgs(
             field_path="datetime",
-            order="DESCENDING",
-        ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
             order="DESCENDING",
         )
     ]
@@ -105,10 +97,6 @@ gcp.firestore.Index(
             field_path="datetime",
             order="ASCENDING",
         ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
-            order="ASCENDING",
-        )
     ]
 )
 
@@ -127,10 +115,6 @@ gcp.firestore.Index(
             field_path="datetime",
             order="DESCENDING",
         ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
-            order="DESCENDING",
-        )
     ]
 )
 
@@ -149,10 +133,6 @@ gcp.firestore.Index(
             field_path="datetime",
             order="ASCENDING",
         ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
-            order="ASCENDING",
-        )
     ]
 )
 
@@ -171,10 +151,6 @@ gcp.firestore.Index(
             field_path="datetime",
             order="DESCENDING",
         ),
-        gcp.firestore.IndexFieldArgs(
-            field_path="__name__",
-            order="DESCENDING",
-        )
     ]
 )
 expire_field = gcp.firestore.Field(
