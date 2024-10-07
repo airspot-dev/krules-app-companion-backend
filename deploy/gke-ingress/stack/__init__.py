@@ -7,7 +7,6 @@ from krules_dev.sane_utils import get_stack_reference
 #from pulumi_kubernetes import Provider as k8s_provider
 import pulumi_gcp as gcp
 
-
 # Initialize a config object
 config = pulumi.Config()
 
@@ -20,11 +19,13 @@ ingress_host = sane_utils.check_env("ingress_host")
 
 base_stack_ref = get_stack_reference("base")
 
+
 def get_static_ip_name():
     ip_name = sane_utils.get_var_for_target("STATIC_IP_NAME")
     if ip_name is None:
         ip_name = sane_utils.name_resource("backend-static-ip")
     return ip_name
+
 
 def get_managed_cert_name():
     ip_name = sane_utils.get_var_for_target("MANAGED_CERT_NAME")
@@ -58,6 +59,13 @@ managed_certificate = kubernetes.apiextensions.CustomResource(
     },
 )
 
+ssl_policy = gcp.compute.SSLPolicy("gke-ingress-ssl-policy-https",
+                                   name=sane_utils.name_resource("ssl-policy"),
+                                   profile="MODERN",
+                                   min_tls_version="TLS_1_2",
+                                   opts=pulumi.ResourceOptions(provider=gcp_provider)
+                                   )
+
 be_https_policy = kubernetes.apiextensions.CustomResource(
     f"{project_name}-{target}-backend-https",
     api_version="networking.gke.io/v1beta1",
@@ -66,7 +74,7 @@ be_https_policy = kubernetes.apiextensions.CustomResource(
         "name": sane_utils.name_resource("backend-https"),
     },
     spec={
-        "sslPolicy": "gke-ingress-ssl-policy-https",
+        "sslPolicy": ssl_policy.name,
         "redirectToHttps": {
             "enabled": True
         }
@@ -144,5 +152,3 @@ ingress = kubernetes.networking.v1.Ingress(
         ]
     )
 )
-
-
