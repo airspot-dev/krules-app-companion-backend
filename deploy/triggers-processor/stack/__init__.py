@@ -38,7 +38,12 @@ deployment = GkeDeployment(
         "celery_broker",
     ],
     app_container_kwargs=dict(
-        env=[]
+        env=[
+            EnvVarArgs(
+                name="REFRESH_INTERVAL",
+                value="10",
+            )
+        ]
     ),
     subscribe_to=[
         (

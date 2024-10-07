@@ -18,12 +18,14 @@ sane_utils.google.make_enable_apis_recipe(
     google_apis=[
         "compute",
         "artifactregistry",
+        "certificatemanager",
         "secretmanager",
         "pubsub",
         "run",
         "firestore",
         "eventarc",
         "iam",
+        "networkservices",
     ]
 )
 
