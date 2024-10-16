@@ -79,7 +79,7 @@ async def dispatch(request: Request):
         if "ttl" in subject:
             ttl = {k: int(v) for k, v in subject.get("ttl").items()}
         else:
-            ttl = {"hours": 24}
+            ttl = {"hours": 1}
         _, doc_ref = db.collection(f"{subscription}/groups/{group}/{entity_id}/event_sourcing").add({
                 "datetime": datetime.now(timezone.utc),
                 "expire_date": datetime.now(timezone.utc) + timedelta(**ttl),
