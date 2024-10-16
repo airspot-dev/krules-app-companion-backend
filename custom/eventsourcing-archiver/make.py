@@ -14,7 +14,8 @@ sane_utils.google.make_cloud_deploy_recipes(
     ],
     sources=[
         "routers.py",
-        "env.py"
+        "env.py",
+        "__app__.py"
     ],
 )
 

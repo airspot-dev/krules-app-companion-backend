@@ -2,7 +2,7 @@ import firebase_admin
 import google.oauth2.id_token
 import google.auth.transport.requests
 from fastapi.openapi.models import APIKey
-from krules_fastapi_env import KRulesAPIRouter
+from fastapi import APIRouter
 from fastapi import Security, HTTPException, Depends
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 from fastapi.security.api_key import APIKeyHeader
@@ -14,7 +14,7 @@ from firebase_admin import auth
 
 firebase_admin.initialize_app()
 
-router = KRulesAPIRouter(
+router = APIRouter(
     prefix="/api/subscriptions/v1",
     tags=["subscriptions"],
     responses={404: {"description": "Not found"}},

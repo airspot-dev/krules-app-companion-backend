@@ -19,7 +19,8 @@ sane_utils.make_prepare_build_context_recipes(
         "common",
     ],
     sources=[
-        "routers.py"
+        "routers.py",
+        "__app__.py"
     ],
 )
 
