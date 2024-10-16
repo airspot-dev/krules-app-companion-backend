@@ -15,7 +15,7 @@ from fastapi import Security, HTTPException, Depends
 from fastapi.openapi.models import APIKey
 from fastapi.security.api_key import APIKeyHeader
 from krules_core.providers import event_router_factory
-from krules_fastapi_env import KRulesAPIRouter
+from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 
@@ -25,13 +25,13 @@ from env import get_secret
 
 firebase_admin.initialize_app()
 
-router = KRulesAPIRouter(
+router = APIRouter(
     prefix="/api/v1",
     tags=["apiV1"],
     responses={404: {"description": "Not found"}},
 )
 
-scheduler = KRulesAPIRouter(
+scheduler = APIRouter(
     prefix="/api/scheduler/v1",
     tags=["apiSchedulerV1"],
     responses={404: {"description": "Not found"}},
