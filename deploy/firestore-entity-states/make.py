@@ -22,6 +22,7 @@ sane_utils.make_prepare_build_context_recipes(
     sources=[
         "routers.py",
         "ruleset.py",
+        "__app__.py"
     ],
 )
 
