@@ -57,7 +57,6 @@ rulesdata: List[Rule] = [
                 f"{payload['entity_base_info']['subscription']}/groups/{payload['entity_base_info']['group']}",
                 document=lambda payload: payload['entity_base_info']['id'],
                 data=lambda payload: payload["data"],
-                track_last_update=True
             ),
             SubjectSchemaUpdateGroupColumns(
                 subscription=lambda payload: payload["entity_base_info"]["subscription"],

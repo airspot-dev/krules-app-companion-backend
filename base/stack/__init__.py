@@ -58,7 +58,7 @@ gcp.firestore.Index(
             order="ASCENDING"
         ),
         gcp.firestore.IndexFieldArgs(
-            field_path="datetime",
+            field_path="_last_update",
             order="ASCENDING",
         )
     ]
@@ -76,7 +76,7 @@ gcp.firestore.Index(
             order="ASCENDING"
         ),
         gcp.firestore.IndexFieldArgs(
-            field_path="datetime",
+            field_path="_last_update",
             order="DESCENDING",
         )
     ]

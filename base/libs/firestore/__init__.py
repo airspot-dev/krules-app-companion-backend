@@ -55,15 +55,17 @@ def process_dictionary(data: Dict[str, Any]) -> Dict[str, Any]:
             except (ValueError, TypeError) as e:
                 print(f"Error parsing date string {value}: {e}")
     return data
+
 class WriteDocument(ProcessingFunction):
 
-    def execute(self, collection, data, document=None, subject_dest=None, track_last_update=False):
+    def execute(self, collection, data, document=None, subject_dest=None):
 
         db = _get_db()
-        if track_last_update:
-            data["_last_update"] = datetime.now(timezone.utc)
 
         data = process_dictionary(data)
+        if "_last_update" not in data:
+            data["_last_update"] = datetime.now(timezone.utc)
+
         if document is not None:
             doc_ref = db.collection(collection).document(document)
             doc_ref.set(data, merge=True)
@@ -71,8 +73,7 @@ class WriteDocument(ProcessingFunction):
             _, doc_ref = db.collection(collection).add(data)
         if subject_dest is not None:
             current_state = doc_ref.get().to_dict()
-            if track_last_update:
-                current_state.pop("_last_update")
+            current_state.pop("_last_update", None)
             self.subject.set(subject_dest, current_state)
 
 
@@ -118,6 +119,9 @@ class RouteSubjectPropertiesData(ProcessingFunction):
         else:
             docs = db.collection(f"{subscription}/groups/{group}").stream()
         self.payload["entities"] = []
+        data = process_dictionary(data)
+        if "_last_update" not in data:
+            data["_last_update"] = datetime.now(timezone.utc)
         for doc in docs:
             self.payload["entities"].append(f"entity|{subscription}|{group}|{doc.id}")
             self.router.route(

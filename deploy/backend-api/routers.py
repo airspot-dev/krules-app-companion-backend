@@ -1,27 +1,23 @@
-import uuid
-from typing import Optional
-
 import os
 import uuid
+from datetime import datetime
 from typing import Optional
 
 import firebase_admin
 import google.auth.exceptions
 import google.auth.transport.requests
 import google.oauth2.id_token
-import pysnooper
-import requests
+from env import get_secret
+from fastapi import APIRouter
 from fastapi import Security, HTTPException, Depends
 from fastapi.openapi.models import APIKey
 from fastapi.security.api_key import APIKeyHeader
 from krules_core.providers import event_router_factory
-from fastapi import APIRouter
 from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_401_UNAUTHORIZED
 
 from common.event_types import IngestionEventsV1
 from common.models.scheduler import ScheduleCallbackSingleRequest, ScheduleCallbackMultiRequest
-from env import get_secret
 
 firebase_admin.initialize_app()
 
@@ -165,6 +161,9 @@ async def ingestion_data_multi(subscription, group, body: GroupUpdatePayload, ap
     # data = await request.json()
     if body.entities_filter is None:
         body.entities_filter = []
+    if "_last_update" not in body.data:
+        body.data["_last_update"] = datetime.utcnow()
+
     event_router_factory().route(
         subject=f'group|{subscription}|{group}',
         event_type=IngestionEventsV1.GROUP_DATA,
@@ -179,6 +178,8 @@ async def ingestion_data_multi(subscription, group, body: GroupUpdatePayload, ap
 @router.post("/{subscription}/{group}/{entity_id}")
 async def ingestion_data(subscription, group, entity_id, data: dict, api_key: APIKey = Depends(get_api_key)):
     # data = await request.json()
+    if "_last_update" not in data:
+        data["_last_update"] = f"dt|{datetime.utcnow().isoformat()}"
     event_router_factory().route(
         subject=f'entity|{subscription}|{group}|{entity_id}',
         event_type=IngestionEventsV1.ENTITY_DATA,
