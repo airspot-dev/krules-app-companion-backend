@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -75,7 +76,7 @@ def get_value(obj):
 
 def map_value_to_plain_dict(obj):
     plain_dict = {}
-    for k in [k for k in obj.fields if not k.startswith("_")]:
+    for k in [k for k in obj.fields if not k.startswith("_") or k == "_last_update"]:
         plain_dict[k] = get_value(obj.fields.get(k))
     return plain_dict
 
@@ -91,6 +92,7 @@ def _process_entity_event(payload: DocumentEventData, event_type: SystemEventsV1
             return
         state = map_value_to_plain_dict(payload.value)
         old_state = map_value_to_plain_dict(payload.old_value)
+        print(f"@@@@@@@@@@@@@@@@@ {json.dumps(state, indent=4)}")
         changed_properties = [el for el in changed_properties if not el.startswith("_")]
         if event_type == SystemEventsV1.ENTITY_CREATED:
             changed_properties = list(state.keys())

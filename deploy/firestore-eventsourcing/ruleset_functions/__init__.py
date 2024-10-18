@@ -33,7 +33,7 @@ class EventsourceStore(ProcessingFunction):
         entity_id = self.payload.get("id")
         state = self.payload.get("state")
         changed_properties = self.payload.get("changed_properties")
-        datetime_ = self.payload.get("datetime", datetime.now(timezone.utc))
+        datetime_ = state.pop("_last_update", datetime.now(timezone.utc))
 
         db.collection(f"{subscription}/groups/{group}/{entity_id}/event_sourcing").add({
             "datetime": datetime_,
