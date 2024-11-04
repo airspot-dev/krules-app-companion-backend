@@ -45,6 +45,7 @@ deployment = GkeDeployment(
             )
         ]
     ),
+    subscriptions_inject_sidecar=False,
     subscribe_to=[
         (
             "firestore-updates",

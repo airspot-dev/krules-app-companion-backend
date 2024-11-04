@@ -41,6 +41,7 @@ deployment = GkeDeployment(
         "celery_broker",
 #        "celery_result_backend",
     ],
+    subscriptions_inject_sidecar=False,
     subscribe_to=[
         (
             "scheduler",

@@ -9,6 +9,12 @@ from krules_fastapi_env import KrulesApp
 
 from common.models.subscriptions import Subscription
 
+from krules_pubsub.subscriber import PubSubSubscriber
+
+import logging
+
+logger = logging.getLogger("rich")
+
 data_lock = threading.RLock()
 
 subscriptions_data: Dict[str, Subscription] = {}
@@ -50,7 +56,13 @@ async def lifespan(app: KrulesApp):
     global running
     thread = threading.Thread(target=_update_subscriptions_data)
     thread.start()
+    subscriber = await PubSubSubscriber.create(logger)
+    subscriber.add_process_function_for_subject(
+        ".*",
+        PubSubSubscriber.KRulesEventRouterHandler(subscriber.logger)
+    )
     yield
+    await subscriber.stop()
     running = False
     thread.join()
 

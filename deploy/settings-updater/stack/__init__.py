@@ -37,6 +37,7 @@ deployment = GkeDeployment(
     access_secrets=[
         "subjects_redis_url",
     ],
+    subscriptions_inject_sidecar=False,
     subscribe_to=[
         (
             "settings",

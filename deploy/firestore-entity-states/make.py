@@ -20,6 +20,7 @@ sane_utils.make_prepare_build_context_recipes(
         "common",
     ],
     sources=[
+        "__app__.py",
         "ruleset.py",
     ],
 )

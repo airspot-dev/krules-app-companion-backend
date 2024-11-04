@@ -39,6 +39,7 @@ deployment = GkeDeployment(
     app_container_kwargs=dict(
         env=[]
     ),
+    subscriptions_inject_sidecar=False,
     subscribe_to=[
         (
             "ingestion",
