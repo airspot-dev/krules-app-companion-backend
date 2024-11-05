@@ -28,4 +28,4 @@ class UpdateSubscriptionTriggers(ProcessingFunction):
             return value
 
         subject = subject_factory(f"subscription|{self.payload.get('_event_info').get('subscription')}")
-        subject.set("triggers", _update_triggers, muted=True)
+        subject.set("triggers", _update_triggers, muted=True, use_cache=False)

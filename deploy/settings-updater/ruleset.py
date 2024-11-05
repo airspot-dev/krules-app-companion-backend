@@ -25,7 +25,7 @@ rulesdata: List[Rule] = [
             SetSubjectProperties(
                 lambda payload: payload
             ),
-            StoreSubject()
+            StoreSubject(),
         ]
     ),
     Rule(
@@ -56,7 +56,7 @@ rulesdata: List[Rule] = [
             SetSubjectProperties(
                 lambda payload: payload
             ),
-            StoreSubject()
+            StoreSubject(),
         ]
     ),
     Rule(
@@ -83,7 +83,6 @@ rulesdata: List[Rule] = [
         ],
         processing=[
             UpdateSubscriptionTriggers(),
-            StoreSubject()
         ]
     ),
 ]
