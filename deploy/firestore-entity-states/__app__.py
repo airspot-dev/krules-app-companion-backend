@@ -1,4 +1,4 @@
-from krules_fastapi_env import KrulesApp
+from krules_fastapi_env import KRulesApp
 from contextlib import asynccontextmanager
 
 from krules_pubsub.subscriber import PubSubSubscriber
@@ -9,7 +9,7 @@ logger = logging.getLogger("rich")
 
 
 @asynccontextmanager
-async def lifespan(app: KrulesApp):
+async def lifespan(app: KRulesApp):
 
     subscriber = await PubSubSubscriber.create(logger)
     subscriber.add_process_function_for_subject(
@@ -22,4 +22,4 @@ async def lifespan(app: KrulesApp):
     await subscriber.stop()
 
 
-app = KrulesApp(lifespan=lifespan)
+app = KRulesApp(lifespan=lifespan)

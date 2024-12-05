@@ -13,7 +13,7 @@ ENV PYTHONPATH /app
 RUN pip install --no-cache-dir --upgrade \
     google-cloud-secret-manager
 
-RUN pip install --no-cache-dir "krules-framework[redis,pubsub,fastapi]==1.0.3"
+RUN pip install --no-cache-dir "krules-framework[redis,pubsub,fastapi]==1.1.0"
 
 # development libs
 RUN pip install --no-cache-dir pysnooper ipython
